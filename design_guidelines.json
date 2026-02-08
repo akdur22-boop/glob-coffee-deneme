@@ -1,0 +1,216 @@
+{
+  "identity": {
+    "name": "Kinetic Roast",
+    "vibe": "Artisan, Bold, Kinetic, Warm",
+    "description": "A coffee experience that feels like a modern artisan workshop. Deep, rich tones mixed with kinetic typography and smooth, fluid motions. Not your average brown app.",
+    "emotional_tone": "The feeling of the first sip of espresso: Intense, Awakening, Smooth."
+  },
+  "typography": {
+    "font_strategy": "System Hybrid",
+    "weights": {
+      "thin": "100",
+      "light": "300",
+      "regular": "400",
+      "medium": "500",
+      "bold": "700",
+      "black": "900"
+    },
+    "styles": {
+      "display": {
+        "fontSize": 32,
+        "fontWeight": "800",
+        "letterSpacing": -1,
+        "lineHeight": 38,
+        "color": "#231F20",
+        "textTransform": "none"
+      },
+      "h1": {
+        "fontSize": 28,
+        "fontWeight": "700",
+        "letterSpacing": -0.5,
+        "lineHeight": 34,
+        "color": "#231F20"
+      },
+      "h2": {
+        "fontSize": 24,
+        "fontWeight": "600",
+        "letterSpacing": -0.5,
+        "lineHeight": 30,
+        "color": "#231F20"
+      },
+      "h3": {
+        "fontSize": 20,
+        "fontWeight": "600",
+        "letterSpacing": 0,
+        "lineHeight": 26,
+        "color": "#231F20"
+      },
+      "bodyLarge": {
+        "fontSize": 18,
+        "fontWeight": "400",
+        "lineHeight": 28,
+        "color": "#4A4A4A"
+      },
+      "body": {
+        "fontSize": 16,
+        "fontWeight": "400",
+        "lineHeight": 24,
+        "color": "#4A4A4A"
+      },
+      "caption": {
+        "fontSize": 14,
+        "fontWeight": "500",
+        "letterSpacing": 0.5,
+        "lineHeight": 20,
+        "color": "#808080",
+        "textTransform": "uppercase"
+      }
+    }
+  },
+  "colors": {
+    "primary": "#231F20",
+    "primary_foreground": "#F9F5F1",
+    "secondary": "#E67E22",
+    "secondary_foreground": "#FFFFFF",
+    "background": "#F9F5F1",
+    "surface": "#FFFFFF",
+    "surface_variant": "#F0EAE4",
+    "text_primary": "#231F20",
+    "text_secondary": "#5C5C5C",
+    "text_muted": "#8A8A8A",
+    "border": "#E5E0DB",
+    "success": "#27AE60",
+    "error": "#D32F2F",
+    "overlay": "rgba(35, 31, 32, 0.4)"
+  },
+  "spacing": {
+    "xs": 4,
+    "s": 8,
+    "m": 16,
+    "l": 24,
+    "xl": 32,
+    "xxl": 48,
+    "xxxl": 64
+  },
+  "borderRadius": {
+    "s": 8,
+    "m": 12,
+    "l": 16,
+    "xl": 24,
+    "full": 9999
+  },
+  "shadows": {
+    "small": {
+      "shadowColor": "#000",
+      "shadowOffset": { "width": 0, "height": 2 },
+      "shadowOpacity": 0.1,
+      "shadowRadius": 4,
+      "elevation": 2
+    },
+    "medium": {
+      "shadowColor": "#000",
+      "shadowOffset": { "width": 0, "height": 4 },
+      "shadowOpacity": 0.15,
+      "shadowRadius": 10,
+      "elevation": 5
+    },
+    "large": {
+      "shadowColor": "#000",
+      "shadowOffset": { "width": 0, "height": 8 },
+      "shadowOpacity": 0.2,
+      "shadowRadius": 20,
+      "elevation": 10
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": {
+        "backgroundColor": "#231F20",
+        "paddingVertical": 16,
+        "paddingHorizontal": 24,
+        "borderRadius": 9999,
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "primary_text": {
+        "color": "#F9F5F1",
+        "fontWeight": "600",
+        "fontSize": 16
+      },
+      "secondary": {
+        "backgroundColor": "#E67E22",
+        "paddingVertical": 16,
+        "paddingHorizontal": 24,
+        "borderRadius": 9999,
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "secondary_text": {
+        "color": "#FFFFFF",
+        "fontWeight": "600",
+        "fontSize": 16
+      },
+      "outline": {
+        "backgroundColor": "transparent",
+        "borderWidth": 1.5,
+        "borderColor": "#231F20",
+        "paddingVertical": 14,
+        "paddingHorizontal": 24,
+        "borderRadius": 9999,
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "outline_text": {
+        "color": "#231F20",
+        "fontWeight": "600",
+        "fontSize": 16
+      }
+    },
+    "inputs": {
+      "default": {
+        "backgroundColor": "#FFFFFF",
+        "borderWidth": 1,
+        "borderColor": "#E5E0DB",
+        "borderRadius": 12,
+        "padding": 16,
+        "fontSize": 16,
+        "color": "#231F20"
+      },
+      "focused": {
+        "borderColor": "#231F20",
+        "borderWidth": 1.5
+      }
+    },
+    "cards": {
+      "container": {
+        "backgroundColor": "#FFFFFF",
+        "borderRadius": 16,
+        "padding": 0,
+        "overflow": "hidden"
+      }
+    }
+  },
+  "assets": {
+    "icons_library": "@expo/vector-icons/Feather",
+    "images": {
+      "hero_bg": "https://images.unsplash.com/photo-1753572736839-7e5d500d2c1d?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "coffee_espresso": "https://images.unsplash.com/photo-1627902511858-6ad7e004fd35?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "coffee_latte": "https://images.unsplash.com/photo-1769181258465-adde11962206?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "pastry_croissant": "https://images.unsplash.com/photo-1712723246766-3eaea22e52ff?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "pastry_assorted": "https://images.unsplash.com/photo-1751151856149-5ebf1d21586a?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "store_interior": "https://images.unsplash.com/photo-1733376041207-e5512cbafae7?crop=entropy&cs=srgb&fm=jpg&q=85",
+      "loyalty_bg": "https://images.unsplash.com/photo-1769985840494-32e240087fa4?crop=entropy&cs=srgb&fm=jpg&q=85"
+    }
+  },
+  "instructions_to_main_agent": [
+    "You are building an Expo React Native app. Do NOT use HTML tags (div, span, img). Use View, Text, Image, TouchableOpacity, ScrollView, FlatList.",
+    "Do NOT use CSS files or className strings. Use StyleSheet.create({}) and style props.",
+    "Navigation: Use 'expo-router'. This means file-based routing in the /app folder. Create a _layout.js for the stack/tabs.",
+    "Icons: Use the specified icon library (Feather or Ionicons) from @expo/vector-icons.",
+    "Safe Area: WRAP your main screens in SafeAreaView (from react-native-safe-area-context) or use proper padding.",
+    "Images: Use the 'uri' property in the source prop: <Image source={{ uri: '...' }} style={...} />. Set explicit width/height.",
+    "Interactions: Add activeOpacity={0.8} to TouchableOpacity for better feedback.",
+    "Design Implementation: Stick to the color palette and typography rules defined above. Use the spacing scale variables.",
+    "Data Test IDs: Add 'testID' (React Native prop) to all interactive elements, NOT 'data-testid'. Example: <TouchableOpacity testID='login-button'>."
+  ]
+}
