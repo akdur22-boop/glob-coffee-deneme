@@ -133,7 +133,7 @@ export default function WelcomeScreen() {
         <View style={styles.bottomSection}>
           <Text style={styles.brand}>KINETIC</Text>
           <Text style={styles.brandSub}>ROAST</Text>
-          <Text style={styles.tagline}>Artisan coffee, crafted with intention.</Text>
+          <Text style={styles.tagline}>Özenle hazırlanmış, zanaatkar kahve.</Text>
 
           <TouchableOpacity
             testID="google-login-btn"
