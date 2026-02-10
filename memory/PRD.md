@@ -1,47 +1,40 @@
-# Kinetic Roast - Coffee Company App PRD
+# Kinetic Roast - Kahve Şirketi Uygulaması PRD
 
-## Overview
-A premium coffee company mobile app built with Expo React Native and FastAPI, featuring menu browsing, ordering, loyalty rewards, store locator, and push notifications.
+## Genel Bakış
+Expo React Native ve FastAPI ile geliştirilmiş, menü, sipariş, sadakat programı, şube bulucu, bildirimler ve kapsamlı admin paneli içeren premium kahve şirketi mobil uygulaması. Tüm arayüz Türkçe.
 
-## Tech Stack
-- **Frontend**: Expo SDK 54, React Native, expo-router (file-based routing)
+## Teknoloji
+- **Frontend**: Expo SDK 54, React Native, expo-router
 - **Backend**: FastAPI (Python), MongoDB (motor async driver)
-- **Auth**: Emergent Google OAuth
+- **Müşteri Auth**: Emergent Google OAuth
+- **Admin Auth**: Email/Şifre (SHA256 hash)
 
-## Features
-### Core
-- **Welcome Screen**: Branded landing with Google Auth login + guest browse
-- **Home**: Greeting, loyalty points card, quick actions, popular picks, promo banner
-- **Menu**: Category-filtered browsing (Espresso, Lattes, Cold Drinks, Pastries), item detail with size/quantity selection
-- **Cart & Ordering**: Add to cart, select pickup store, place order with points earned
-- **Rewards**: Tier system (Bronze/Silver/Gold), earn 10pts/$1, redeem for free items
-- **Store Locator**: 4 locations with directions & call actions
-- **Profile**: User info, order history, quick links
-- **Notifications**: In-app notification feed with read/unread states
+## Müşteri Özellikleri
+- Türkçe hoş geldin ekranı + Google Auth / Misafir girişi
+- Ana sayfa: Puan kartı, hızlı erişim, popüler ürünler, kampanyalar, promosyon banner
+- Menü: Kategori filtreli (Espresso, Latte, Soğuk İçecekler, Atıştırmalık) - 11 ürün, TL fiyatlar
+- Ürün detay: Boyut/adet seçimi + sepete ekle
+- Sepet: Şube seçimi + sipariş verme (₺1 = 10 puan)
+- Sadakat: Bronz → Gümüş → Altın seviye, 5 ödül
+- Şube bulucu: 4 İstanbul lokasyonu (Kadıköy, Beşiktaş, Nişantaşı, Bağdat Caddesi)
+- Profil: Sipariş geçmişi, QR kodum
+- Bildirimler
 
-### Auth
-- Emergent Google OAuth with session management
-- Guest browsing supported (auth required only for orders/rewards)
-- Session token stored in AsyncStorage
+## Admin Paneli (admin@kineticr.com / admin123)
+- **Genel Bakış**: Müşteri/sipariş/gelir/menü/şube/kampanya istatistikleri
+- **Menü Yönetimi**: Ürün ekle/sil (CRUD)
+- **Kampanya Yönetimi**: Yüzde veya sabit indirimli kampanya oluştur/sil
+- **Toplu Bildirim**: Tüm kullanıcılara bildirim gönder
+- **QR Kod Tarayıcı**: Müşteri QR kodu okut → puan ekle
+- **Şube Yönetimi**: Şube ekle/sil (adres, saat, telefon)
+- **Şube Yetkilileri**: Yeni şube yöneticisi hesabı oluştur/sil
+- **Sipariş Yönetimi**: Durum güncelle (Onaylandı/Hazırlanıyor/Hazır/Tamamlandı/İptal)
+- **Ödül Yönetimi**: Ödül ekle/sil
+- **Müşteri Listesi**: Tüm kullanıcıları görüntüle
 
-## API Endpoints
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | /api/menu | No | All menu items |
-| GET | /api/menu/:id | No | Single item |
-| GET | /api/stores | No | All store locations |
-| GET | /api/rewards | No | Available rewards |
-| POST | /api/auth/session | No | Exchange session_id |
-| GET | /api/auth/me | Yes | Current user |
-| POST | /api/auth/logout | Yes | Logout |
-| POST | /api/orders | Yes | Place order |
-| GET | /api/orders | Yes | User order history |
-| POST | /api/rewards/redeem | Yes | Redeem reward |
-| GET | /api/notifications | Yes | User notifications |
-| POST | /api/push-token | Yes | Register push token |
+## API Endpoints (30+)
+Müşteri: /api/menu, /api/stores, /api/rewards, /api/orders, /api/notifications, /api/campaigns, /api/my-qr, /api/auth/*
+Admin: /api/admin/login, /api/admin/stats, /api/admin/menu/*, /api/admin/campaigns/*, /api/admin/stores/*, /api/admin/managers/*, /api/admin/orders/*, /api/admin/rewards/*, /api/admin/users, /api/admin/notifications/send, /api/admin/add-points
 
-## Database Collections
-- users, user_sessions, menu_items, orders, stores, rewards, notifications, push_tokens
-
-## Business Enhancement
-- **Subscription Model**: Offer a "Kinetic Pass" monthly subscription ($14.99/mo) with unlimited free medium drinks, 2x point earning, and early access to seasonal specials — driving recurring revenue and customer retention.
+## İş Geliştirme Önerisi
+"Kinetic Pass" aylık abonelik (₺149/ay): Sınırsız orta boy içecek + 2x puan + sezonluk ürünlere erken erişim — tekrarlayan gelir ve müşteri bağlılığı.
