@@ -119,6 +119,7 @@ export default function WelcomeScreen() {
       <Image
         source={{ uri: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800' }}
         style={styles.bgImage}
+        resizeMode="cover"
       />
       <View style={styles.overlay} />
       <SafeAreaView style={styles.content}>
