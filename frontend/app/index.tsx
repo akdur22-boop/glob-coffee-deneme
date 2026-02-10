@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#231F20' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#231F20' },
   loadingText: { marginTop: 16, color: '#F9F5F1', fontSize: 16 },
-  bgImage: { position: 'absolute', width: width, height: height, resizeMode: 'cover' },
+  bgImage: { position: 'absolute', width: width, height: height },
   overlay: { position: 'absolute', width: width, height: height, backgroundColor: 'rgba(35,31,32,0.65)' },
   content: { flex: 1, justifyContent: 'space-between', paddingHorizontal: 32 },
   topSection: { marginTop: 24, alignItems: 'flex-start' },
