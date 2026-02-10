@@ -4,9 +4,18 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const { width, height } = Dimensions.get('window');
+
+// Safe window access helpers - prevent crashes on native
+const getWindowLocation = () => {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    return window.location;
+  }
+  return null;
+};
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -36,19 +45,34 @@ export default function WelcomeScreen() {
     setLoading(false);
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    if (Platform.OS === 'web') {
+    const loc = getWindowLocation();
+    if (Platform.OS === 'web' && loc) {
       setAuthLoading(true);
-      const redirectUrl = window.location.origin + '/(tabs)';
-      window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+      const redirectUrl = loc.origin + '/(tabs)';
+      loc.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    } else {
+      // Native: open auth in browser
+      try {
+        setAuthLoading(true);
+        const redirectUrl = `${API_URL}/(tabs)`;
+        await WebBrowser.openBrowserAsync(
+          `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`
+        );
+      } catch (e) {
+        console.log('Native auth error', e);
+      } finally {
+        setAuthLoading(false);
+      }
     }
   };
 
   // Handle session_id from URL hash (web only)
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      const hash = window.location.hash;
+    const loc = getWindowLocation();
+    if (loc) {
+      const hash = loc.hash;
       if (hash && hash.includes('session_id=')) {
         const sessionId = hash.split('session_id=')[1];
         if (sessionId) {
@@ -69,8 +93,9 @@ export default function WelcomeScreen() {
       if (res.ok) {
         const data = await res.json();
         await AsyncStorage.setItem('session_token', data.session_token);
-        if (Platform.OS === 'web') {
-          window.history.replaceState(null, '', window.location.pathname);
+        const loc = getWindowLocation();
+        if (loc) {
+          window.history.replaceState(null, '', loc.pathname);
         }
         router.replace('/(tabs)');
       }
