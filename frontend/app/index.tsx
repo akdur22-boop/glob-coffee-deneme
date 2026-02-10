@@ -156,7 +156,17 @@ export default function WelcomeScreen() {
             <Text style={styles.guestButtonText}>Browse as Guest</Text>
           </TouchableOpacity>
 
-          <Text style={styles.terms}>By continuing, you agree to our Terms & Privacy Policy</Text>
+          <Text style={styles.terms}>Devam ederek Kullanım Şartlarını ve Gizlilik Politikasını kabul edersiniz</Text>
+
+          <TouchableOpacity
+            testID="admin-panel-link"
+            style={styles.adminLink}
+            activeOpacity={0.8}
+            onPress={() => router.push('/admin/login')}
+          >
+            <Feather name="shield" size={14} color="rgba(249,245,241,0.4)" />
+            <Text style={styles.adminLinkText}>Admin Paneli</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </View>
