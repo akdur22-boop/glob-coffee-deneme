@@ -9,7 +9,7 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 export default function CartScreen() {
   const router = useRouter();
-  const { cart, removeFromCart, clearCart, cartTotal, sessionToken, authHeaders, fetchUser } = useApp();
+  const { cart = [], removeFromCart, clearCart, cartTotal, sessionToken, authHeaders, fetchUser } = useApp();
   const [stores, setStores] = useState<any[]>([]);
   const [selectedStore, setSelectedStore] = useState<any>(null);
   const [ordering, setOrdering] = useState(false);
