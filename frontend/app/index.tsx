@@ -203,4 +203,6 @@ const styles = StyleSheet.create({
   },
   guestButtonText: { fontSize: 16, fontWeight: '600', color: '#F9F5F1' },
   terms: { textAlign: 'center', fontSize: 12, color: 'rgba(249,245,241,0.4)' },
+  adminLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 16 },
+  adminLinkText: { color: 'rgba(249,245,241,0.4)', fontSize: 12, marginLeft: 6, fontWeight: '500' },
 });
