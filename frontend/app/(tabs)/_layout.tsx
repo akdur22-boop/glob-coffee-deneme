@@ -8,7 +8,7 @@ import { AppProvider } from '../../context/AppContext';
 export default function TabLayout() {
   // Handle auth callback session_id on web
   useEffect(() => {
-    if (Platform.OS === 'web') {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
       const hash = window.location.hash;
       if (hash && hash.includes('session_id=')) {
         const sessionId = hash.split('session_id=')[1];
@@ -30,7 +30,7 @@ export default function TabLayout() {
       if (res.ok) {
         const data = await res.json();
         await AsyncStorage.setItem('session_token', data.session_token);
-        if (Platform.OS === 'web') {
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
           window.history.replaceState(null, '', window.location.pathname);
         }
       }
