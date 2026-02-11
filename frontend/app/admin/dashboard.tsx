@@ -300,19 +300,28 @@ export default function AdminDashboard() {
           {/* SCANNER */}
           {section === 'scanner' && (<View>
             <Text style={s.sectionTitle}>QR Kod ile Puan Ekle</Text>
-            {scanning ? (
+            {scanning && CameraView ? (
               <View style={s.scannerWrap}>
                 <CameraView style={s.scanner} barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-                  onBarcodeScanned={(result) => handleQRScan({ data: result.data })} />
+                  onBarcodeScanned={(result: any) => handleQRScan({ data: result.data })} />
                 <TouchableOpacity style={s.scanCloseBtn} onPress={() => setScanning(false)}><Feather name="x" size={24} color="#FFF" /></TouchableOpacity>
               </View>
             ) : (
               <View style={s.scannerSection}>
-                <TouchableOpacity testID="start-scan-btn" style={s.scanButton} activeOpacity={0.8} onPress={() => setScanning(true)}>
-                  <Feather name="camera" size={32} color="#E67E22" />
-                  <Text style={s.scanButtonText}>QR Kod Tara</Text>
-                  <Text style={s.scanButtonSub}>Müşterinin QR kodunu okutun</Text>
-                </TouchableOpacity>
+                {Platform.OS !== 'web' && (
+                  <TouchableOpacity testID="start-scan-btn" style={s.scanButton} activeOpacity={0.8} onPress={() => setScanning(true)}>
+                    <Feather name="camera" size={32} color="#E67E22" />
+                    <Text style={s.scanButtonText}>QR Kod Tara</Text>
+                    <Text style={s.scanButtonSub}>Müşterinin QR kodunu okutun</Text>
+                  </TouchableOpacity>
+                )}
+                {Platform.OS === 'web' && (
+                  <View style={s.scanButton}>
+                    <Feather name="smartphone" size={32} color="#E67E22" />
+                    <Text style={s.scanButtonText}>QR Tarama</Text>
+                    <Text style={s.scanButtonSub}>Kamera tarama mobil cihazda çalışır. Aşağıdan manuel ID girin.</Text>
+                  </View>
+                )}
                 <Text style={s.orText}>veya</Text>
                 <View style={s.formGroup}><Text style={s.formLabel}>Kullanıcı ID (Manuel)</Text>
                   <TextInput testID="manual-user-id" style={s.formInput} placeholder="user_xxxx" placeholderTextColor="#999" value={scannedUser} onChangeText={setScannedUser} /></View>
