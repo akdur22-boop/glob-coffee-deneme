@@ -144,7 +144,7 @@ export default function WelcomeScreen() {
             <View style={styles.googleIconWrap}>
               <Text style={styles.googleIcon}>G</Text>
             </View>
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
+            <Text style={styles.googleButtonText}>Google ile Devam Et</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
