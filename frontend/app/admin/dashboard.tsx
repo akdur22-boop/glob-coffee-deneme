@@ -4,7 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CameraView } from 'expo-camera';
+
+// CameraView only works on native - lazy import to prevent web crash
+let CameraView: any = null;
+if (Platform.OS !== 'web') {
+  try { CameraView = require('expo-camera').CameraView; } catch {}
+}
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
