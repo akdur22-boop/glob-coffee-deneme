@@ -153,7 +153,7 @@ export default function WelcomeScreen() {
             activeOpacity={0.8}
             onPress={() => router.replace('/(tabs)')}
           >
-            <Text style={styles.guestButtonText}>Browse as Guest</Text>
+            <Text style={styles.guestButtonText}>Misafir Olarak Göz At</Text>
           </TouchableOpacity>
 
           <Text style={styles.terms}>Devam ederek Kullanım Şartlarını ve Gizlilik Politikasını kabul edersiniz</Text>
