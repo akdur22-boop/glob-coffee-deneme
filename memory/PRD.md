@@ -1,40 +1,56 @@
-# Kinetic Roast - Kahve Şirketi Uygulaması PRD
+# Glob Coffee - Product Requirements Document
 
-## Genel Bakış
-Expo React Native ve FastAPI ile geliştirilmiş, menü, sipariş, sadakat programı, şube bulucu, bildirimler ve kapsamlı admin paneli içeren premium kahve şirketi mobil uygulaması. Tüm arayüz Türkçe.
+## Overview
+Turkish-language mobile application for "Glob Coffee" company with a customer-facing app and admin dashboard.
 
-## Teknoloji
-- **Frontend**: Expo SDK 54, React Native, expo-router
-- **Backend**: FastAPI (Python), MongoDB (motor async driver)
-- **Müşteri Auth**: Emergent Google OAuth
-- **Admin Auth**: Email/Şifre (SHA256 hash)
+## Tech Stack
+- **Frontend**: Expo SDK 54, React Native, Expo Router, TypeScript
+- **Backend**: Python FastAPI, Motor (async MongoDB driver)
+- **Database**: MongoDB
 
-## Müşteri Özellikleri
-- Türkçe hoş geldin ekranı + Google Auth / Misafir girişi
-- Ana sayfa: Puan kartı, hızlı erişim, popüler ürünler, kampanyalar, promosyon banner
-- Menü: Kategori filtreli (Espresso, Latte, Soğuk İçecekler, Atıştırmalık) - 11 ürün, TL fiyatlar
-- Ürün detay: Boyut/adet seçimi + sepete ekle
-- Sepet: Şube seçimi + sipariş verme (₺1 = 10 puan)
-- Sadakat: Bronz → Gümüş → Altın seviye, 5 ödül
-- Şube bulucu: 4 İstanbul lokasyonu (Kadıköy, Beşiktaş, Nişantaşı, Bağdat Caddesi)
-- Profil: Sipariş geçmişi, QR kodum
-- Bildirimler
+## Customer App Features
+- ✅ Welcome screen with Google OAuth & guest browsing
+- ✅ Home screen with Instagram-style Stories (campaigns)
+- ✅ Daily Spin the Wheel for rewards
+- ✅ Coffee menu with categories and item details
+- ✅ Shopping cart and ordering system
+- ✅ Rewards/loyalty program with tier system (Bronz/Gümüş/Altın)
+- ✅ Store locator with directions and phone
+- ✅ Notifications system
+- ✅ User profile with order history
+- ✅ Full Turkish localization
 
-## Admin Paneli (admin@kineticr.com / admin123)
-- **Genel Bakış**: Müşteri/sipariş/gelir/menü/şube/kampanya istatistikleri
-- **Menü Yönetimi**: Ürün ekle/sil (CRUD)
-- **Kampanya Yönetimi**: Yüzde veya sabit indirimli kampanya oluştur/sil
-- **Toplu Bildirim**: Tüm kullanıcılara bildirim gönder
-- **QR Kod Tarayıcı**: Müşteri QR kodu okut → puan ekle
-- **Şube Yönetimi**: Şube ekle/sil (adres, saat, telefon)
-- **Şube Yetkilileri**: Yeni şube yöneticisi hesabı oluştur/sil
-- **Sipariş Yönetimi**: Durum güncelle (Onaylandı/Hazırlanıyor/Hazır/Tamamlandı/İptal)
-- **Ödül Yönetimi**: Ödül ekle/sil
-- **Müşteri Listesi**: Tüm kullanıcıları görüntüle
+## Admin Dashboard Features
+- ✅ Separate admin login (admin@globcoffee.com / admin123)
+- ✅ Dashboard with statistics (users, orders, revenue, etc.)
+- ✅ Menu management (CRUD)
+- ✅ Campaign management (CRUD)
+- ✅ Store/branch management (CRUD)
+- ✅ Manager account creation (CRUD with role-based access)
+- ✅ Spin wheel prize management (CRUD)
+- ✅ Reward management (CRUD)
+- ✅ QR code scanning for adding loyalty points
+- ✅ Push notification sending to all users
+- ✅ Order management with status updates
+- ✅ Customer listing
 
-## API Endpoints (30+)
-Müşteri: /api/menu, /api/stores, /api/rewards, /api/orders, /api/notifications, /api/campaigns, /api/my-qr, /api/auth/*
-Admin: /api/admin/login, /api/admin/stats, /api/admin/menu/*, /api/admin/campaigns/*, /api/admin/stores/*, /api/admin/managers/*, /api/admin/orders/*, /api/admin/rewards/*, /api/admin/users, /api/admin/notifications/send, /api/admin/add-points
+## API Endpoints
+All endpoints prefixed with `/api`
 
-## İş Geliştirme Önerisi
-"Kinetic Pass" aylık abonelik (₺149/ay): Sınırsız orta boy içecek + 2x puan + sezonluk ürünlere erken erişim — tekrarlayan gelir ve müşteri bağlılığı.
+### Public
+- GET /api/menu, /api/stores, /api/campaigns, /api/wheel-prizes, /api/rewards
+
+### Customer (auth required)
+- POST /api/orders, /api/rewards/redeem, /api/wheel/spin
+- GET /api/orders, /api/notifications, /api/my-qr
+
+### Admin (admin auth required)
+- Full CRUD for menu, campaigns, stores, managers, wheel-prizes, rewards
+- POST /api/admin/notifications/send, /api/admin/add-points
+- GET /api/admin/stats, /api/admin/users, /api/admin/orders
+
+## Branding
+- App Name: Glob Coffee
+- Primary Color: #E67E22 (Orange)
+- Dark: #231F20
+- Background: #F9F5F1
