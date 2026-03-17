@@ -41,8 +41,9 @@ export default function AdminDashboard() {
   // Scanner
   const [scanning, setScanning] = useState(false);
   const [scannedUser, setScannedUser] = useState('');
-  const [pointsToAdd, setPointsToAdd] = useState('');
   const [addingPoints, setAddingPoints] = useState(false);
+  const [scanResult, setScanResult] = useState<any>(null);
+  const [scanSettings, setScanSettings] = useState<any>(null);
 
   // Notification form
   const [notifTitle, setNotifTitle] = useState('');
@@ -79,6 +80,7 @@ export default function AdminDashboard() {
       if (s === 'rewards') { const r = await fetch(`${API_URL}/api/rewards`); if (r.ok) setRewards(await r.json()); }
       if (s === 'users') { const r = await fetch(`${API_URL}/api/admin/users`, { headers: h }); if (r.ok) setUsers(await r.json()); }
       if (s === 'wheel') { const r = await fetch(`${API_URL}/api/admin/wheel-prizes`, { headers: h }); if (r.ok) setWheelPrizes(await r.json()); }
+      if (s === 'scanner') { loadScanSettings(); }
     } catch {}
   };
 
@@ -139,17 +141,36 @@ export default function AdminDashboard() {
 
   const handleQRScan = async ({ data }: { data: string }) => {
     if (addingPoints) return;
-    setScanning(false); setScannedUser(data);
+    setScanning(false);
+    setScannedUser(data);
+    // Otomatik puan ekle
+    autoAddPoints(data);
   };
 
-  const addPoints = async () => {
-    if (!scannedUser || !pointsToAdd) { Alert.alert('Hata', 'Kullanıcı ID ve puan gerekli'); return; }
+  const autoAddPoints = async (userId?: string) => {
+    const uid = userId || scannedUser;
+    if (!uid) { Alert.alert('Hata', 'Kullanıcı ID gerekli'); return; }
     setAddingPoints(true);
+    setScanResult(null);
     try {
-      const r = await fetch(`${API_URL}/api/admin/add-points`, { method: 'POST', headers: headers(), body: JSON.stringify({ user_id: scannedUser, points: parseInt(pointsToAdd) }) });
-      if (r.ok) { const d = await r.json(); Alert.alert('Başarılı', `${d.user_name} kullanıcısına ${pointsToAdd} puan eklendi.\nToplam: ${d.new_points} puan (${d.tier})`); setScannedUser(''); setPointsToAdd(''); }
-      else { const e = await r.json(); Alert.alert('Hata', e.detail || 'Puan eklenemedi'); }
+      const r = await fetch(`${API_URL}/api/admin/scan-checkin`, { method: 'POST', headers: headers(), body: JSON.stringify({ user_id: uid.trim() }) });
+      const d = await r.json();
+      if (r.ok) {
+        setScanResult({ success: true, ...d });
+        Alert.alert('Başarılı ✅', `${d.user_name} kullanıcısına otomatik ${d.points_added} puan eklendi.\nToplam: ${d.new_points} puan (${d.tier})`);
+        setScannedUser('');
+      } else {
+        setScanResult({ success: false, message: d.detail });
+        Alert.alert('Uyarı', d.detail || 'Puan eklenemedi');
+      }
     } catch { Alert.alert('Hata', 'Bağlantı hatası'); } finally { setAddingPoints(false); }
+  };
+
+  const loadScanSettings = async () => {
+    try {
+      const r = await fetch(`${API_URL}/api/admin/scan-settings`, { headers: { Authorization: `Bearer ${token}` } });
+      if (r.ok) setScanSettings(await r.json());
+    } catch {}
   };
 
   const addReward = async () => {
@@ -314,7 +335,11 @@ export default function AdminDashboard() {
 
           {/* SCANNER */}
           {section === 'scanner' && (<View>
-            <Text style={s.sectionTitle}>QR Kod ile Puan Ekle</Text>
+            <Text style={s.sectionTitle}>QR Kod ile Otomatik Puan</Text>
+            <View style={s.scanInfoCard}>
+              <Feather name="shield" size={20} color="#27AE60" />
+              <Text style={s.scanInfoText}>Sistem otomatik sabit puan ekler. Yetkili puan miktarını değiştiremez. (Her tarama: {scanSettings?.scan_points || 50} puan, Bekleme: {scanSettings?.cooldown_minutes || 120} dk)</Text>
+            </View>
             {scanning && CameraView ? (
               <View style={s.scannerWrap}>
                 <CameraView style={s.scanner} barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
@@ -327,7 +352,7 @@ export default function AdminDashboard() {
                   <TouchableOpacity testID="start-scan-btn" style={s.scanButton} activeOpacity={0.8} onPress={() => setScanning(true)}>
                     <Feather name="camera" size={32} color="#E67E22" />
                     <Text style={s.scanButtonText}>QR Kod Tara</Text>
-                    <Text style={s.scanButtonSub}>Müşterinin QR kodunu okutun</Text>
+                    <Text style={s.scanButtonSub}>Müşterinin telefonundaki QR kodu okutun</Text>
                   </TouchableOpacity>
                 )}
                 {Platform.OS === 'web' && (
@@ -337,14 +362,28 @@ export default function AdminDashboard() {
                     <Text style={s.scanButtonSub}>Kamera tarama mobil cihazda çalışır. Aşağıdan manuel ID girin.</Text>
                   </View>
                 )}
-                <Text style={s.orText}>veya</Text>
-                <View style={s.formGroup}><Text style={s.formLabel}>Kullanıcı ID (Manuel)</Text>
+                <Text style={s.orText}>veya manuel giriş</Text>
+                <View style={s.formGroup}><Text style={s.formLabel}>Müşteri ID</Text>
                   <TextInput testID="manual-user-id" style={s.formInput} placeholder="user_xxxx" placeholderTextColor="#999" value={scannedUser} onChangeText={setScannedUser} /></View>
-                <View style={s.formGroup}><Text style={s.formLabel}>Eklenecek Puan</Text>
-                  <TextInput testID="points-input" style={s.formInput} placeholder="100" placeholderTextColor="#999" value={pointsToAdd} onChangeText={setPointsToAdd} keyboardType="numeric" /></View>
-                <TouchableOpacity testID="add-points-btn" style={[s.confirmBtn, { width: '100%' }]} activeOpacity={0.8} onPress={addPoints} disabled={addingPoints}>
-                  {addingPoints ? <ActivityIndicator color="#FFF" /> : <Text style={s.confirmBtnText}>Puan Ekle</Text>}
+                <TouchableOpacity testID="auto-scan-btn" style={[s.confirmBtn, { width: '100%', flexDirection: 'row', gap: 8, justifyContent: 'center' }]} activeOpacity={0.8} onPress={() => autoAddPoints()} disabled={addingPoints}>
+                  {addingPoints ? <ActivityIndicator color="#FFF" /> : <><Feather name="zap" size={18} color="#FFF" /><Text style={s.confirmBtnText}>Otomatik Puan Ekle</Text></>}
                 </TouchableOpacity>
+
+                {scanResult && (
+                  <View style={[s.scanResultCard, { borderLeftColor: scanResult.success ? '#27AE60' : '#D32F2F' }]}>
+                    <Feather name={scanResult.success ? 'check-circle' : 'alert-circle'} size={20} color={scanResult.success ? '#27AE60' : '#D32F2F'} />
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                      {scanResult.success ? (
+                        <>
+                          <Text style={s.scanResultTitle}>{scanResult.user_name}</Text>
+                          <Text style={s.scanResultSub}>+{scanResult.points_added} puan eklendi · Toplam: {scanResult.new_points} ({scanResult.tier})</Text>
+                        </>
+                      ) : (
+                        <Text style={s.scanResultTitle}>{scanResult.message}</Text>
+                      )}
+                    </View>
+                  </View>
+                )}
               </View>
             )}
           </View>)}
@@ -557,6 +596,11 @@ const s = StyleSheet.create({
   scanButtonText: { fontSize: 18, fontWeight: '700', color: '#231F20', marginTop: 12 },
   scanButtonSub: { fontSize: 13, color: '#8A8A8A', marginTop: 4 },
   orText: { fontSize: 14, color: '#8A8A8A', marginVertical: 12 },
+  scanInfoCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F5E9', borderRadius: 12, padding: 14, marginBottom: 16, gap: 10 },
+  scanInfoText: { flex: 1, fontSize: 13, color: '#2E7D32', lineHeight: 18 },
+  scanResultCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 12, padding: 16, marginTop: 16, borderLeftWidth: 4, elevation: 1 },
+  scanResultTitle: { fontSize: 15, fontWeight: '700', color: '#231F20' },
+  scanResultSub: { fontSize: 13, color: '#8A8A8A', marginTop: 2 },
   // Status chips
   statusChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: '#E5E0DB', marginRight: 6 },
   statusChipText: { fontSize: 12, fontWeight: '600', color: '#8A8A8A' },

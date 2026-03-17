@@ -321,6 +321,51 @@ backend:
         - agent: "testing"
         - comment: "✅ Customer rewards endpoint working. Retrieved 5 rewards with point requirements and categories."
 
+  - task: "Admin Auto-Scan Settings API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "GET /api/admin/scan-settings - Returns current scan points and cooldown settings"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ Auto-scan settings API working perfectly. Returns correct default values: 50 points, 120 minutes cooldown. Requires admin authentication."
+
+  - task: "Admin Auto-Scan Check-in API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "POST /api/admin/scan-checkin - Automatically adds fixed 50 points to user, with cooldown protection"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ Auto-scan check-in API working perfectly. Successfully adds 50 points automatically, updates user tier, creates notification. Message format correct: 'Otomatik 50 puan eklendi'. Cooldown mechanism working - prevents duplicate scans within 120 minutes with proper error message."
+
+  - task: "Admin Scan Settings Update API"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "PUT /api/admin/scan-settings - Allows superadmin to update scan points (1-200 range)"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ Scan settings update API working correctly. Successfully updated scan points from 50 to 75. Proper superadmin access control implemented. Returns confirmation message with new points value."
+
 frontend:
   - task: "Home Screen with Stories and Spin Wheel"
     implemented: true
@@ -375,3 +420,7 @@ agent_communication:
     - message: "Please test ALL backend API endpoints. Start by logging in as admin (POST /api/admin/login with email=admin@globcoffee.com, password=admin123). Then use the admin token to test all CRUD endpoints: menu, campaigns, stores, managers, wheel-prizes, notifications, add-points. Also test customer endpoints: GET /api/menu, GET /api/stores, GET /api/campaigns, GET /api/wheel-prizes. The backend runs at localhost:8001."
     - agent: "testing"
     - message: "✅ COMPREHENSIVE BACKEND TESTING COMPLETED - ALL 28 API TESTS PASSED (100% success rate). Tested: Root API, all customer endpoints (menu, stores, campaigns, wheel-prizes, rewards), admin login, admin CRUD operations (menu, campaigns, stores, managers, wheel-prizes), admin notifications, add-points (QR), admin stats, users/orders management. All endpoints working correctly with proper authentication, data validation, and response formats. Backend is fully functional and ready for production use. Authentication working perfectly with Bearer tokens. Database operations (MongoDB) working correctly with proper seeding. No critical issues found."
+    - agent: "main"
+    - message: "Test the NEW backend auto-scan API endpoints for the Glob Coffee app. Test flow: 1) Admin login, 2) GET /api/admin/scan-settings, 3) Test POST /api/admin/scan-checkin with auto 50-point addition, 4) Test cooldown mechanism, 5) Test PUT /api/admin/scan-settings update, 6) Verify old add-points endpoint still works. All endpoints require admin Bearer token authentication."
+    - agent: "testing"
+    - message: "✅ NEW AUTO-SCAN API TESTING COMPLETED - ALL 6 TESTS PASSED (100% success rate). Tested: GET /api/admin/scan-settings (returns 50 points, 120min cooldown), POST /api/admin/scan-checkin (adds fixed 50 points automatically with proper Turkish message 'Otomatik 50 puan eklendi'), cooldown mechanism (prevents duplicate scans with remaining time message), PUT /api/admin/scan-settings (superadmin can update points 1-200), old add-points endpoint compatibility. All auto-scan endpoints working perfectly with proper authentication, Turkish language support, tier updates, notifications, and database persistence. Ready for production use."

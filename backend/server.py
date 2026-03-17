@@ -335,6 +335,57 @@ async def add_points(request: Request):
     await db.notifications.insert_one({"notification_id": f"notif_{uuid.uuid4().hex[:10]}", "user_id": uid, "title": "Puan Kazandınız!", "body": f"Hesabınıza {pts} puan eklendi. Toplam: {new_pts} puan.", "read": False, "created_at": datetime.now(timezone.utc).isoformat()})
     return {"message": f"{pts} puan eklendi", "new_points": new_pts, "tier": tier, "user_name": user["name"]}
 
+# ═══ ADMIN: Auto Scan — Fixed points, no manual override ═══
+SCAN_COOLDOWN_MINUTES = 120  # 2 saat cooldown
+DEFAULT_SCAN_POINTS = 50     # Her taramada sabit 50 puan
+
+@api_router.post("/admin/scan-checkin")
+async def scan_checkin(request: Request):
+    admin = await get_admin_user(request)
+    body = await request.json()
+    uid = body.get("user_id", "").strip()
+    if not uid: raise HTTPException(400, "Kullanıcı ID gerekli")
+    user = await db.users.find_one({"user_id": uid}, {"_id": 0})
+    if not user: raise HTTPException(404, "Kullanıcı bulunamadı")
+    # Cooldown kontrolü
+    now = datetime.now(timezone.utc)
+    last_scan = await db.scan_checkins.find_one({"user_id": uid}, {"_id": 0}, sort=[("created_at", -1)])
+    if last_scan:
+        last_time = last_scan.get("created_at")
+        if isinstance(last_time, str): last_time = datetime.fromisoformat(last_time)
+        if last_time.tzinfo is None: last_time = last_time.replace(tzinfo=timezone.utc)
+        diff_min = (now - last_time).total_seconds() / 60
+        if diff_min < SCAN_COOLDOWN_MINUTES:
+            remaining = int(SCAN_COOLDOWN_MINUTES - diff_min)
+            raise HTTPException(429, f"Bu müşteri yakın zamanda tarandı. {remaining} dakika sonra tekrar deneyin.")
+    # Ayarlardan puan miktarını al (yoksa default kullan)
+    settings = await db.app_settings.find_one({"key": "scan_points"}, {"_id": 0})
+    pts = int(settings["value"]) if settings else DEFAULT_SCAN_POINTS
+    new_pts = user.get("points", 0) + pts
+    tier = "Bronz"
+    if new_pts >= 500: tier = "Altın"
+    elif new_pts >= 200: tier = "Gümüş"
+    await db.users.update_one({"user_id": uid}, {"$set": {"points": new_pts, "tier": tier}})
+    await db.scan_checkins.insert_one({"user_id": uid, "admin_id": admin["admin_id"], "points_added": pts, "created_at": now.isoformat()})
+    await db.notifications.insert_one({"notification_id": f"notif_{uuid.uuid4().hex[:10]}", "user_id": uid, "title": "Puan Kazandınız!", "body": f"Mağaza ziyaretiniz için {pts} puan kazandınız! Toplam: {new_pts} puan.", "read": False, "created_at": now.isoformat()})
+    return {"message": f"Otomatik {pts} puan eklendi", "new_points": new_pts, "tier": tier, "user_name": user["name"], "points_added": pts}
+
+@api_router.get("/admin/scan-settings")
+async def get_scan_settings(request: Request):
+    await get_admin_user(request)
+    settings = await db.app_settings.find_one({"key": "scan_points"}, {"_id": 0})
+    return {"scan_points": int(settings["value"]) if settings else DEFAULT_SCAN_POINTS, "cooldown_minutes": SCAN_COOLDOWN_MINUTES}
+
+@api_router.put("/admin/scan-settings")
+async def update_scan_settings(request: Request):
+    admin = await get_admin_user(request)
+    if admin["role"] != "superadmin": raise HTTPException(403, "Yetkiniz yok")
+    body = await request.json()
+    pts = int(body.get("scan_points", DEFAULT_SCAN_POINTS))
+    if pts <= 0 or pts > 200: raise HTTPException(400, "Puan 1-200 arası olmalı")
+    await db.app_settings.update_one({"key": "scan_points"}, {"$set": {"key": "scan_points", "value": pts}}, upsert=True)
+    return {"message": f"Tarama puanı {pts} olarak güncellendi", "scan_points": pts}
+
 # ═══ ADMIN: Orders ═══
 @api_router.get("/admin/orders")
 async def admin_orders(request: Request):

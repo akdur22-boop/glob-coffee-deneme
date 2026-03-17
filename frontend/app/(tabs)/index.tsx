@@ -1,13 +1,165 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, RefreshControl, Dimensions, ActivityIndicator, Modal, Animated } from 'react-native';
+import {
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Image,
+  RefreshControl, Dimensions, ActivityIndicator, Modal, Animated,
+  Platform, FlatList
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+let QRCode: any = null;
+try { QRCode = require('react-native-qrcode-svg').default; } catch {}
+
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-const { width } = Dimensions.get('window');
+const { width, height: screenHeight } = Dimensions.get('window');
+
+// ─── QR Code Modal ───
+function QRCodeModal({ user, onClose }: { user: any; onClose: () => void }) {
+  return (
+    <Modal visible transparent animationType="slide">
+      <View style={qr.overlay}>
+        <View style={qr.container}>
+          <TouchableOpacity testID="qr-close" style={qr.closeBtn} onPress={onClose}>
+            <Feather name="x" size={24} color="#231F20" />
+          </TouchableOpacity>
+          <Text style={qr.title}>QR Kodum</Text>
+          <Text style={qr.subtitle}>Kasada bu kodu göstererek puan kazanın</Text>
+
+          <View style={qr.codeWrap}>
+            {QRCode ? (
+              <QRCode
+                value={user.user_id}
+                size={200}
+                color="#231F20"
+                backgroundColor="#FFF"
+              />
+            ) : (
+              <View style={qr.fallbackQR}>
+                <Feather name="maximize" size={64} color="#E67E22" />
+                <Text style={qr.fallbackText}>{user.user_id}</Text>
+              </View>
+            )}
+          </View>
+
+          <View style={qr.userInfo}>
+            <Text style={qr.userName}>{user.name}</Text>
+            <View style={qr.pointsRow}>
+              <Feather name="star" size={16} color="#E67E22" />
+              <Text style={qr.pointsText}>{user.points} puan</Text>
+              <View style={qr.tierBadge}>
+                <Text style={qr.tierText}>{user.tier}</Text>
+              </View>
+            </View>
+          </View>
+
+          <Text style={qr.hint}>Kasadaki yetkili bu kodu okutarak puanınızı ekleyecektir</Text>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// ─── Full-Screen Story Viewer ───
+function StoryViewer({ campaigns, initialIndex, campaignImages, onClose }: {
+  campaigns: any[]; initialIndex: number; campaignImages: Record<string, string>; onClose: () => void;
+}) {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const STORY_DURATION = 5000;
+
+  const campaign = campaigns[currentIndex];
+
+  const startProgress = useCallback(() => {
+    progressAnim.setValue(0);
+    Animated.timing(progressAnim, {
+      toValue: 1,
+      duration: STORY_DURATION,
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) goNext();
+    });
+  }, [currentIndex]);
+
+  useEffect(() => {
+    startProgress();
+    return () => { progressAnim.stopAnimation(); };
+  }, [currentIndex]);
+
+  const goNext = () => {
+    if (currentIndex < campaigns.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      onClose();
+    }
+  };
+
+  const goPrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleTap = (x: number) => {
+    if (x < width * 0.3) goPrev();
+    else goNext();
+  };
+
+  return (
+    <Modal visible transparent animationType="fade">
+      <View style={sv.container}>
+        <Image
+          source={{ uri: campaignImages[campaign.campaign_id] }}
+          style={sv.bgImage}
+          resizeMode="cover"
+        />
+        <View style={sv.bgOverlay} />
+
+        {/* Progress bars */}
+        <SafeAreaView edges={['top']} style={sv.topBar}>
+          <View style={sv.progressRow}>
+            {campaigns.map((_, i) => (
+              <View key={i} style={sv.progressBg}>
+                {i < currentIndex ? (
+                  <View style={[sv.progressFill, { width: '100%' }]} />
+                ) : i === currentIndex ? (
+                  <Animated.View style={[sv.progressFill, {
+                    width: progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] })
+                  }]} />
+                ) : null}
+              </View>
+            ))}
+          </View>
+          <TouchableOpacity testID="story-close" style={sv.closeBtn} onPress={onClose}>
+            <Feather name="x" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </SafeAreaView>
+
+        {/* Touch areas */}
+        <TouchableOpacity
+          style={sv.touchArea}
+          activeOpacity={1}
+          onPress={(e) => handleTap(e.nativeEvent.locationX)}
+        >
+          <View style={sv.contentArea}>
+            <View style={sv.badge}>
+              <Text style={sv.badgeText}>
+                {campaign.discount_type === 'percent'
+                  ? `%${campaign.discount_value}`
+                  : `₺${campaign.discount_value}`} İNDİRİM
+              </Text>
+            </View>
+            <Text style={sv.storyTitle}>{campaign.title}</Text>
+            <Text style={sv.storyDesc}>{campaign.description}</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  );
+}
 
 // ─── Spin Wheel Component ───
 function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: () => void; sessionToken: string | null }) {
@@ -24,6 +176,7 @@ function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: 
       const data = await r.json();
       if (data.already_spun) {
         setResult(data.prize);
+        setSpinning(false);
         return;
       }
       const idx = data.prize_index || 0;
@@ -31,19 +184,24 @@ function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: 
       const targetAngle = 360 * 5 + (360 - idx * sliceAngle - sliceAngle / 2);
       Animated.timing(rotation, { toValue: targetAngle, duration: 4000, useNativeDriver: true }).start(() => {
         setResult(data.prize);
+        setSpinning(false);
       });
-    } catch { setResult({ label: 'Hata oluştu', type: 'error', value: 0 }); } finally { setSpinning(false); }
+    } catch {
+      setResult({ label: 'Hata oluştu', type: 'error', value: 0 });
+      setSpinning(false);
+    }
   };
 
   const rotateStr = rotation.interpolate({ inputRange: [0, 360], outputRange: ['0deg', '360deg'] });
-
   const defaultColors = ['#E67E22', '#27AE60', '#1976D2', '#D32F2F', '#7B1FA2', '#FF6F00', '#00838F', '#C2185B'];
 
   return (
     <Modal visible transparent animationType="fade">
       <View style={ws.overlay}>
         <View style={ws.container}>
-          <TouchableOpacity testID="wheel-close" style={ws.closeBtn} onPress={onClose}><Feather name="x" size={24} color="#231F20" /></TouchableOpacity>
+          <TouchableOpacity testID="wheel-close" style={ws.closeBtn} onPress={onClose}>
+            <Feather name="x" size={24} color="#231F20" />
+          </TouchableOpacity>
           <Text style={ws.title}>Günlük Şans Çarkı</Text>
           <Text style={ws.subtitle}>Her gün bir kez çevirme hakkınız var!</Text>
 
@@ -52,13 +210,13 @@ function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: 
               <View style={ws.resultCircle}><Feather name="gift" size={48} color="#E67E22" /></View>
               <Text style={ws.resultTitle}>Tebrikler!</Text>
               <Text style={ws.resultPrize}>{result.label}</Text>
-              <TouchableOpacity style={ws.resultBtn} onPress={onClose}><Text style={ws.resultBtnText}>Tamam</Text></TouchableOpacity>
+              <TouchableOpacity style={ws.resultBtn} onPress={onClose}>
+                <Text style={ws.resultBtnText}>Tamam</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={ws.wheelWrap}>
-              {/* Pointer */}
               <View style={ws.pointer}><Text style={{ fontSize: 24 }}>▼</Text></View>
-              {/* Wheel */}
               <Animated.View style={[ws.wheel, { width: WHEEL_SIZE, height: WHEEL_SIZE, borderRadius: WHEEL_SIZE / 2, transform: [{ rotate: rotateStr }] }]}>
                 {prizes.map((p, i) => {
                   const angle = (i * 360) / prizes.length;
@@ -95,7 +253,9 @@ export default function HomeScreen() {
   const [showWheel, setShowWheel] = useState(false);
   const [wheelPrizes, setWheelPrizes] = useState<any[]>([]);
   const [alreadySpunToday, setAlreadySpunToday] = useState(false);
-  const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
+  const [showQR, setShowQR] = useState(false);
+  const [storyViewerIndex, setStoryViewerIndex] = useState<number | null>(null);
+  const campaignScrollRef = useRef<FlatList>(null);
 
   useEffect(() => { loadData(); }, [sessionToken]);
 
@@ -111,11 +271,10 @@ export default function HomeScreen() {
         await fetchUser();
         const notifRes = await fetch(`${API_URL}/api/notifications`, { headers: { Authorization: `Bearer ${sessionToken}` } });
         if (notifRes.ok) { const n = await notifRes.json(); setUnreadCount(n.filter((x: any) => !x.read).length); }
-        // Check if already spun
         const lastSpin = await AsyncStorage.getItem('last_spin_date');
         const today = new Date().toISOString().split('T')[0];
         if (lastSpin === today) setAlreadySpunToday(true);
-        else if (!lastSpin) { setShowWheel(true); } // Show wheel on first open of the day
+        else if (!lastSpin) { setShowWheel(true); }
       }
     } catch {} finally { setLoading(false); }
   };
@@ -134,48 +293,39 @@ export default function HomeScreen() {
   if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
 
   const campaignImages: Record<string, string> = {};
+  const defaultCampImages = [
+    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600',
+    'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600',
+    'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600',
+    'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600',
+  ];
   campaigns.forEach((c, i) => {
-    campaignImages[c.campaign_id] = c.image_url || [
-      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200',
-      'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200',
-      'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200',
-      'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=200',
-    ][i % 4];
+    campaignImages[c.campaign_id] = c.image_url || defaultCampImages[i % defaultCampImages.length];
   });
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
-      {/* Spin Wheel Modal */}
+      {/* Modals */}
       {showWheel && wheelPrizes.length > 0 && sessionToken && (
         <SpinWheel prizes={wheelPrizes} onClose={handleSpinClose} sessionToken={sessionToken} />
       )}
-
-      {/* Campaign Detail Modal */}
-      {selectedCampaign && (
-        <Modal visible transparent animationType="slide">
-          <View style={s.campModalOverlay}>
-            <View style={s.campModalContent}>
-              <Image source={{ uri: campaignImages[selectedCampaign.campaign_id] }} style={s.campModalImage} resizeMode="cover" />
-              <TouchableOpacity style={s.campModalClose} onPress={() => setSelectedCampaign(null)}><Feather name="x" size={24} color="#FFF" /></TouchableOpacity>
-              <View style={s.campModalInfo}>
-                <View style={s.campModalBadge}>
-                  <Text style={s.campModalBadgeText}>{selectedCampaign.discount_type === 'percent' ? `%${selectedCampaign.discount_value}` : `₺${selectedCampaign.discount_value}`} İNDİRİM</Text>
-                </View>
-                <Text style={s.campModalTitle}>{selectedCampaign.title}</Text>
-                <Text style={s.campModalDesc}>{selectedCampaign.description}</Text>
-                <TouchableOpacity style={s.campModalBtn} onPress={() => { setSelectedCampaign(null); router.push('/(tabs)/menu'); }}>
-                  <Text style={s.campModalBtnText}>Sipariş Ver</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
+      {showQR && user && <QRCodeModal user={user} onClose={() => setShowQR(false)} />}
+      {storyViewerIndex !== null && campaigns.length > 0 && (
+        <StoryViewer
+          campaigns={campaigns}
+          initialIndex={storyViewerIndex}
+          campaignImages={campaignImages}
+          onClose={() => setStoryViewerIndex(null)}
+        />
       )}
 
       <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#E67E22" />}>
         {/* Header */}
         <View style={s.header}>
-          <View><Text style={s.greeting}>{greeting()}</Text><Text style={s.userName}>{user?.name || 'Kahve Sever'}</Text></View>
+          <View>
+            <Text style={s.greeting}>{greeting()}</Text>
+            <Text style={s.userName}>{user?.name || 'Kahve Sever'}</Text>
+          </View>
           <View style={s.headerRight}>
             {sessionToken && !alreadySpunToday && (
               <TouchableOpacity testID="wheel-trigger" style={s.wheelBtn} onPress={() => setShowWheel(true)} activeOpacity={0.8}>
@@ -189,11 +339,17 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* ─── Instagram Stories Campaigns ─── */}
+        {/* ─── Instagram Stories ─── */}
         {campaigns.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.storiesScroll}>
-            {campaigns.map((c) => (
-              <TouchableOpacity key={c.campaign_id} testID={`story-${c.campaign_id}`} style={s.storyItem} activeOpacity={0.8} onPress={() => setSelectedCampaign(c)}>
+            {campaigns.map((c, i) => (
+              <TouchableOpacity
+                key={c.campaign_id}
+                testID={`story-${c.campaign_id}`}
+                style={s.storyItem}
+                activeOpacity={0.8}
+                onPress={() => setStoryViewerIndex(i)}
+              >
                 <View style={s.storyRing}>
                   <Image source={{ uri: campaignImages[c.campaign_id] }} style={s.storyImage} resizeMode="cover" />
                 </View>
@@ -203,16 +359,40 @@ export default function HomeScreen() {
           </ScrollView>
         )}
 
-        {/* Points Card */}
+        {/* Points Card + QR Button */}
         {user && (
-          <TouchableOpacity testID="loyalty-card" style={s.pointsCard} activeOpacity={0.9} onPress={() => router.push('/(tabs)/rewards')}>
-            <View style={s.pointsTop}>
-              <View><Text style={s.pointsLabel}>PUAN BAKİYENİZ</Text><Text style={s.pointsValue}>{user.points} puan</Text></View>
-              <View style={s.tierBadge}><Feather name="award" size={16} color="#E67E22" /><Text style={s.tierText}>{user.tier}</Text></View>
-            </View>
-            <View style={s.pointsBar}><View style={[s.pointsFill, { width: `${Math.min((user.points / 500) * 100, 100)}%` }]} /></View>
-            <Text style={s.pointsHint}>{user.points < 500 ? `Altın seviyeye ${500 - user.points} puan` : 'Altın seviyedesiniz!'}</Text>
-          </TouchableOpacity>
+          <View style={s.pointsSection}>
+            <TouchableOpacity testID="loyalty-card" style={s.pointsCard} activeOpacity={0.9} onPress={() => router.push('/(tabs)/rewards')}>
+              <View style={s.pointsTop}>
+                <View>
+                  <Text style={s.pointsLabel}>PUAN BAKİYENİZ</Text>
+                  <Text style={s.pointsValue}>{user.points} puan</Text>
+                </View>
+                <View style={s.tierBadge}>
+                  <Feather name="award" size={16} color="#E67E22" />
+                  <Text style={s.tierText}>{user.tier}</Text>
+                </View>
+              </View>
+              <View style={s.pointsBar}>
+                <View style={[s.pointsFill, { width: `${Math.min((user.points / 500) * 100, 100)}%` }]} />
+              </View>
+              <Text style={s.pointsHint}>
+                {user.points < 500 ? `Altın seviyeye ${500 - user.points} puan` : 'Altın seviyedesiniz!'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* QR Code Button */}
+            <TouchableOpacity testID="qr-button" style={s.qrButton} activeOpacity={0.8} onPress={() => setShowQR(true)}>
+              <View style={s.qrIconWrap}>
+                <Feather name="maximize" size={24} color="#FFF" />
+              </View>
+              <View style={s.qrTextWrap}>
+                <Text style={s.qrTitle}>QR Kodum</Text>
+                <Text style={s.qrSubtitle}>Kasada göster, puan kazan</Text>
+              </View>
+              <Feather name="chevron-right" size={20} color="rgba(249,245,241,0.5)" />
+            </TouchableOpacity>
+          </View>
         )}
 
         {/* Quick Actions */}
@@ -230,18 +410,66 @@ export default function HomeScreen() {
           ))}
         </View>
 
-        {/* Popular */}
-        <View style={s.sectionHeader}><Text style={s.sectionTitle}>Popüler Ürünler</Text>
+        {/* Popular Products */}
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>Popüler Ürünler</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/menu')}><Text style={s.seeAll}>Tümünü Gör</Text></TouchableOpacity>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.featuredScroll}>
           {featuredItems.map((item) => (
             <TouchableOpacity key={item.item_id} testID={`featured-${item.item_id}`} style={s.featuredCard} activeOpacity={0.85} onPress={() => router.push(`/item/${item.item_id}`)}>
               <Image source={{ uri: item.image_url }} style={s.featuredImage} resizeMode="cover" />
-              <View style={s.featuredInfo}><Text style={s.featuredName} numberOfLines={1}>{item.name}</Text><Text style={s.featuredPrice}>₺{item.price}</Text></View>
+              <View style={s.featuredInfo}>
+                <Text style={s.featuredName} numberOfLines={1}>{item.name}</Text>
+                <Text style={s.featuredPrice}>₺{item.price}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        {/* ─── Campaign Slider ─── */}
+        {campaigns.length > 0 && (
+          <View style={s.campaignSection}>
+            <View style={s.sectionHeader}>
+              <Text style={s.sectionTitle}>Kampanyalar</Text>
+              <Text style={s.campaignCounter}>{campaigns.length} aktif</Text>
+            </View>
+            <FlatList
+              ref={campaignScrollRef}
+              data={campaigns}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.campaign_id}
+              contentContainerStyle={s.campaignListContent}
+              snapToInterval={width - 48}
+              decelerationRate="fast"
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  testID={`campaign-card-${item.campaign_id}`}
+                  style={s.campaignCard}
+                  activeOpacity={0.9}
+                  onPress={() => {
+                    const idx = campaigns.findIndex(c => c.campaign_id === item.campaign_id);
+                    setStoryViewerIndex(idx >= 0 ? idx : 0);
+                  }}
+                >
+                  <Image source={{ uri: campaignImages[item.campaign_id] }} style={s.campaignImage} resizeMode="cover" />
+                  <View style={s.campaignOverlay} />
+                  <View style={s.campaignContent}>
+                    <View style={s.campaignBadge}>
+                      <Text style={s.campaignBadgeText}>
+                        {item.discount_type === 'percent' ? `%${item.discount_value}` : `₺${item.discount_value}`} İNDİRİM
+                      </Text>
+                    </View>
+                    <Text style={s.campaignTitle}>{item.title}</Text>
+                    <Text style={s.campaignDesc} numberOfLines={2}>{item.description}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        )}
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -249,6 +477,44 @@ export default function HomeScreen() {
   );
 }
 
+// ─── QR Modal Styles ───
+const qr = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
+  container: { backgroundColor: '#FFF', borderRadius: 24, padding: 32, width: width * 0.88, alignItems: 'center' },
+  closeBtn: { position: 'absolute', top: 16, right: 16, zIndex: 10 },
+  title: { fontSize: 24, fontWeight: '800', color: '#231F20', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: '#8A8A8A', marginBottom: 24 },
+  codeWrap: { padding: 20, backgroundColor: '#FFF', borderRadius: 16, borderWidth: 2, borderColor: '#E67E22', marginBottom: 20 },
+  fallbackQR: { width: 200, height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FEF0E1', borderRadius: 12 },
+  fallbackText: { fontSize: 11, color: '#8A8A8A', marginTop: 8, textAlign: 'center' },
+  userInfo: { alignItems: 'center', marginBottom: 16 },
+  userName: { fontSize: 18, fontWeight: '700', color: '#231F20', marginBottom: 8 },
+  pointsRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  pointsText: { fontSize: 15, fontWeight: '600', color: '#231F20' },
+  tierBadge: { backgroundColor: '#FEF0E1', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
+  tierText: { fontSize: 12, fontWeight: '700', color: '#E67E22' },
+  hint: { fontSize: 12, color: '#8A8A8A', textAlign: 'center', lineHeight: 18 },
+});
+
+// ─── Story Viewer Styles ───
+const sv = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#000' },
+  bgImage: { position: 'absolute', width, height: screenHeight },
+  bgOverlay: { position: 'absolute', width, height: screenHeight, backgroundColor: 'rgba(0,0,0,0.35)' },
+  topBar: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, paddingHorizontal: 16, paddingTop: 8 },
+  progressRow: { flexDirection: 'row', gap: 4, marginBottom: 12 },
+  progressBg: { flex: 1, height: 3, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 2, overflow: 'hidden' },
+  progressFill: { height: 3, backgroundColor: '#FFF', borderRadius: 2 },
+  closeBtn: { alignSelf: 'flex-end', width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
+  touchArea: { flex: 1, justifyContent: 'flex-end' },
+  contentArea: { paddingHorizontal: 24, paddingBottom: 80 },
+  badge: { alignSelf: 'flex-start', backgroundColor: 'rgba(230,126,34,0.9)', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, marginBottom: 16 },
+  badgeText: { fontSize: 14, fontWeight: '800', color: '#FFF', letterSpacing: 0.5 },
+  storyTitle: { fontSize: 32, fontWeight: '800', color: '#FFF', marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
+  storyDesc: { fontSize: 16, color: 'rgba(255,255,255,0.85)', lineHeight: 24, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 },
+});
+
+// ─── Spin Wheel Styles ───
 const ws = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
   container: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, width: width * 0.9, maxHeight: '85%', alignItems: 'center' },
@@ -260,7 +526,7 @@ const ws = StyleSheet.create({
   wheel: { overflow: 'hidden', position: 'relative', borderWidth: 4, borderColor: '#231F20' },
   slice: { position: 'absolute', top: 0, left: 0, justifyContent: 'center' },
   sliceInner: { width: '50%', height: '100%', justifyContent: 'center', paddingLeft: 16 },
-  sliceLabel: { color: '#FFF', fontSize: 11, fontWeight: '700', transform: [{ rotate: '0deg' }] },
+  sliceLabel: { color: '#FFF', fontSize: 11, fontWeight: '700' },
   spinBtn: { backgroundColor: '#E67E22', width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginTop: 20, borderWidth: 3, borderColor: '#FFF', elevation: 4 },
   spinBtnText: { color: '#FFF', fontSize: 14, fontWeight: '800' },
   resultWrap: { alignItems: 'center', paddingVertical: 20 },
@@ -271,9 +537,12 @@ const ws = StyleSheet.create({
   resultBtnText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
 });
 
+// ─── Main Styles ───
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9F5F1' },
   loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9F5F1' },
+
+  // Header
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: 8, paddingBottom: 8 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   greeting: { fontSize: 14, color: '#8A8A8A', fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' },
@@ -290,20 +559,9 @@ const s = StyleSheet.create({
   storyImage: { width: 56, height: 56, borderRadius: 28 },
   storyLabel: { fontSize: 11, fontWeight: '600', color: '#5C5C5C', marginTop: 6, textAlign: 'center' },
 
-  // Campaign Modal
-  campModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'center', alignItems: 'center' },
-  campModalContent: { width: width * 0.88, backgroundColor: '#FFF', borderRadius: 24, overflow: 'hidden' },
-  campModalImage: { width: '100%', height: 220 },
-  campModalClose: { position: 'absolute', top: 16, right: 16, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  campModalInfo: { padding: 24 },
-  campModalBadge: { alignSelf: 'flex-start', backgroundColor: '#FEF0E1', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, marginBottom: 14 },
-  campModalBadgeText: { fontSize: 13, fontWeight: '800', color: '#E67E22', letterSpacing: 0.5 },
-  campModalTitle: { fontSize: 24, fontWeight: '800', color: '#231F20', marginBottom: 8 },
-  campModalDesc: { fontSize: 15, color: '#5C5C5C', lineHeight: 22, marginBottom: 20 },
-  campModalBtn: { backgroundColor: '#E67E22', paddingVertical: 16, borderRadius: 9999, alignItems: 'center' },
-  campModalBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700' },
-
-  pointsCard: { marginHorizontal: 24, backgroundColor: '#231F20', borderRadius: 20, padding: 24, marginBottom: 24 },
+  // Points + QR
+  pointsSection: { paddingHorizontal: 24, marginBottom: 24 },
+  pointsCard: { backgroundColor: '#231F20', borderRadius: 20, padding: 24, marginBottom: 12 },
   pointsTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   pointsLabel: { fontSize: 12, color: 'rgba(249,245,241,0.5)', fontWeight: '600', letterSpacing: 1 },
   pointsValue: { fontSize: 36, fontWeight: '800', color: '#F9F5F1', marginTop: 4 },
@@ -312,17 +570,42 @@ const s = StyleSheet.create({
   pointsBar: { height: 6, backgroundColor: 'rgba(249,245,241,0.15)', borderRadius: 3, overflow: 'hidden' },
   pointsFill: { height: 6, backgroundColor: '#E67E22', borderRadius: 3 },
   pointsHint: { fontSize: 13, color: 'rgba(249,245,241,0.5)', marginTop: 10 },
+
+  qrButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E67E22', borderRadius: 16, padding: 16 },
+  qrIconWrap: { width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+  qrTextWrap: { flex: 1 },
+  qrTitle: { fontSize: 16, fontWeight: '700', color: '#FFF' },
+  qrSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 2 },
+
+  // Quick Actions
   quickActions: { flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 16, marginBottom: 32 },
   quickBtn: { alignItems: 'center' },
   quickIcon: { width: 56, height: 56, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   quickLabel: { fontSize: 12, fontWeight: '600', color: '#5C5C5C' },
+
+  // Section
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16 },
   sectionTitle: { fontSize: 22, fontWeight: '700', color: '#231F20' },
   seeAll: { fontSize: 14, fontWeight: '600', color: '#E67E22' },
+
+  // Featured
   featuredScroll: { paddingLeft: 24, paddingRight: 8 },
   featuredCard: { width: width * 0.42, backgroundColor: '#FFF', borderRadius: 16, marginRight: 16, overflow: 'hidden', elevation: 3 },
   featuredImage: { width: '100%', height: 140 },
   featuredInfo: { padding: 12 },
   featuredName: { fontSize: 15, fontWeight: '600', color: '#231F20', marginBottom: 4 },
   featuredPrice: { fontSize: 16, fontWeight: '700', color: '#E67E22' },
+
+  // Campaign Slider
+  campaignSection: { marginTop: 24 },
+  campaignCounter: { fontSize: 14, fontWeight: '600', color: '#8A8A8A' },
+  campaignListContent: { paddingHorizontal: 24 },
+  campaignCard: { width: width - 64, height: 200, borderRadius: 20, overflow: 'hidden', marginRight: 16, position: 'relative' },
+  campaignImage: { width: '100%', height: '100%', position: 'absolute' },
+  campaignOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 20 },
+  campaignContent: { flex: 1, justifyContent: 'flex-end', padding: 20 },
+  campaignBadge: { alignSelf: 'flex-start', backgroundColor: 'rgba(230,126,34,0.9)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, marginBottom: 8 },
+  campaignBadgeText: { fontSize: 12, fontWeight: '800', color: '#FFF' },
+  campaignTitle: { fontSize: 20, fontWeight: '800', color: '#FFF', marginBottom: 4 },
+  campaignDesc: { fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 18 },
 });
