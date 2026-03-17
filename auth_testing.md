@@ -28,14 +28,14 @@ print('User ID: ' + userId);
 
 ## Step 2: Test Backend API
 ```bash
-curl -X GET "https://brew-hub-19.preview.emergentagent.com/api/auth/me" \
+curl -X GET "https://coffee-admin-portal.preview.emergentagent.com/api/auth/me" \
   -H "Authorization: Bearer YOUR_SESSION_TOKEN"
 
-curl -X GET "https://brew-hub-19.preview.emergentagent.com/api/menu" 
+curl -X GET "https://coffee-admin-portal.preview.emergentagent.com/api/menu" 
 
-curl -X GET "https://brew-hub-19.preview.emergentagent.com/api/stores"
+curl -X GET "https://coffee-admin-portal.preview.emergentagent.com/api/stores"
 
-curl -X GET "https://brew-hub-19.preview.emergentagent.com/api/rewards"
+curl -X GET "https://coffee-admin-portal.preview.emergentagent.com/api/rewards"
 ```
 
 ## Step 3: Browser Testing
@@ -49,5 +49,5 @@ await page.context.add_cookies([{
     "secure": true,
     "sameSite": "None"
 }]);
-await page.goto("https://brew-hub-19.preview.emergentagent.com");
+await page.goto("https://coffee-admin-portal.preview.emergentagent.com");
 ```

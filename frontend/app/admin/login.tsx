@@ -37,13 +37,13 @@ export default function AdminLoginScreen() {
         <View style={s.header}>
           <View style={s.iconWrap}><Feather name="shield" size={32} color="#E67E22" /></View>
           <Text style={s.title}>Admin Paneli</Text>
-          <Text style={s.subtitle}>Kinetic Roast Yönetim Sistemi</Text>
+          <Text style={s.subtitle}>Glob Coffee Yönetim Sistemi</Text>
         </View>
         <View style={s.form}>
           <Text style={s.label}>EMAIL</Text>
           <View style={s.inputWrap}>
             <Feather name="mail" size={18} color="#8A8A8A" />
-            <TextInput testID="admin-email-input" style={s.input} placeholder="admin@kineticr.com" placeholderTextColor="#666" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+            <TextInput testID="admin-email-input" style={s.input} placeholder="admin@globcoffee.com" placeholderTextColor="#666" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
           </View>
           <Text style={s.label}>ŞİFRE</Text>
           <View style={s.inputWrap}>

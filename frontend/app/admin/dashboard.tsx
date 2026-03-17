@@ -13,7 +13,7 @@ if (Platform.OS !== 'web') {
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-type Section = 'home' | 'menu' | 'campaigns' | 'notifications' | 'scanner' | 'stores' | 'managers' | 'orders' | 'rewards' | 'users';
+type Section = 'home' | 'menu' | 'campaigns' | 'notifications' | 'scanner' | 'stores' | 'managers' | 'orders' | 'rewards' | 'users' | 'wheel';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -32,6 +32,7 @@ export default function AdminDashboard() {
   const [managers, setManagers] = useState<any[]>([]);
   const [rewards, setRewards] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [wheelPrizes, setWheelPrizes] = useState<any[]>([]);
 
   // Forms
   const [showForm, setShowForm] = useState(false);
@@ -66,6 +67,8 @@ export default function AdminDashboard() {
 
   const loadSection = async (s: Section) => {
     setSection(s);
+    setShowForm(false);
+    setFormData({});
     const h = { Authorization: `Bearer ${token}` };
     try {
       if (s === 'menu') { const r = await fetch(`${API_URL}/api/menu`); if (r.ok) setMenuItems(await r.json()); }
@@ -75,6 +78,7 @@ export default function AdminDashboard() {
       if (s === 'managers') { const r = await fetch(`${API_URL}/api/admin/managers`, { headers: h }); if (r.ok) setManagers(await r.json()); }
       if (s === 'rewards') { const r = await fetch(`${API_URL}/api/rewards`); if (r.ok) setRewards(await r.json()); }
       if (s === 'users') { const r = await fetch(`${API_URL}/api/admin/users`, { headers: h }); if (r.ok) setUsers(await r.json()); }
+      if (s === 'wheel') { const r = await fetch(`${API_URL}/api/admin/wheel-prizes`, { headers: h }); if (r.ok) setWheelPrizes(await r.json()); }
     } catch {}
   };
 
@@ -157,6 +161,16 @@ export default function AdminDashboard() {
 
   const deleteReward = (id: string) => Alert.alert('Sil', 'Bu ödülü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/rewards/${id}`, { method: 'DELETE', headers: headers() }); loadSection('rewards'); } }]);
 
+  const addWheelPrize = async () => {
+    try {
+      const r = await fetch(`${API_URL}/api/admin/wheel-prizes`, { method: 'POST', headers: headers(), body: JSON.stringify({ label: formData.label || 'Hediye', type: formData.type || 'points', value: parseInt(formData.value || '10'), color: formData.color || '#E67E22', probability: parseFloat(formData.probability || '10') }) });
+      if (r.ok) { Alert.alert('Başarılı', 'Çark ödülü eklendi'); setShowForm(false); setFormData({}); loadSection('wheel'); }
+      else { const e = await r.json(); Alert.alert('Hata', e.detail || 'Eklenemedi'); }
+    } catch { Alert.alert('Hata', 'Çark ödülü eklenemedi'); }
+  };
+
+  const deleteWheelPrize = (id: string) => Alert.alert('Sil', 'Bu çark ödülünü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/wheel-prizes/${id}`, { method: 'DELETE', headers: headers() }); loadSection('wheel'); } }]);
+
   if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
 
   const menuItems_nav: { icon: string; label: string; key: Section; color: string }[] = [
@@ -164,9 +178,10 @@ export default function AdminDashboard() {
     { icon: 'coffee', label: 'Menü', key: 'menu', color: '#8B4513' },
     { icon: 'tag', label: 'Kampanya', key: 'campaigns', color: '#27AE60' },
     { icon: 'bell', label: 'Bildirim', key: 'notifications', color: '#1976D2' },
+    { icon: 'disc', label: 'Çark', key: 'wheel', color: '#FF6F00' },
     { icon: 'maximize', label: 'QR Tara', key: 'scanner', color: '#7B1FA2' },
     { icon: 'map-pin', label: 'Şubeler', key: 'stores', color: '#D32F2F' },
-    { icon: 'users', label: 'Yetkililer', key: 'managers', color: '#FF6F00' },
+    { icon: 'users', label: 'Yetkililer', key: 'managers', color: '#00695C' },
     { icon: 'package', label: 'Siparişler', key: 'orders', color: '#0288D1' },
     { icon: 'gift', label: 'Ödüller', key: 'rewards', color: '#C2185B' },
     { icon: 'user', label: 'Müşteriler', key: 'users', color: '#5C6BC0' },
@@ -347,7 +362,7 @@ export default function AdminDashboard() {
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Şube Ekle</Text>
-              <FormInput label="Şube Adı" field="name" placeholder="Kinetic Roast — Taksim" />
+              <FormInput label="Şube Adı" field="name" placeholder="Glob Coffee — Taksim" />
               <FormInput label="Adres" field="address" placeholder="İstiklal Cad. No:42" />
               <FormInput label="Şehir" field="city" placeholder="İstanbul" />
               <FormInput label="Çalışma Saatleri" field="hours" placeholder="08:00 - 22:00" />
@@ -373,7 +388,7 @@ export default function AdminDashboard() {
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Yetkili Oluştur</Text>
               <FormInput label="İsim Soyisim" field="name" placeholder="Ahmet Yılmaz" />
-              <FormInput label="Email" field="email" placeholder="ahmet@kineticr.com" />
+              <FormInput label="Email" field="email" placeholder="ahmet@globcoffee.com" />
               <FormInput label="Şifre" field="password" placeholder="••••••••" />
               <FormInput label="Şube ID (opsiyonel)" field="store_id" placeholder="store_001" />
               <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
@@ -424,6 +439,46 @@ export default function AdminDashboard() {
               <FormInput label="Kategori" field="category" placeholder="İçecek, Yiyecek, vb." />
               <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
                 <TouchableOpacity testID="confirm-add-reward" style={s.confirmBtn} onPress={addReward}><Text style={s.confirmBtnText}>Ekle</Text></TouchableOpacity>
+              </View>
+            </View></View></Modal>
+          </View>)}
+
+          {/* WHEEL PRIZES */}
+          {section === 'wheel' && (<View>
+            <View style={s.sectionHeader}><Text style={s.sectionTitle}>Çark Ödülleri</Text>
+              <TouchableOpacity testID="add-wheel-btn" style={s.addButton} onPress={() => { setFormData({ type: 'points', color: '#E67E22' }); setShowForm(true); }}><Feather name="plus" size={18} color="#FFF" /><Text style={s.addButtonText}>Ekle</Text></TouchableOpacity>
+            </View>
+            {wheelPrizes.length === 0 ? <Text style={s.emptyText}>Henüz çark ödülü eklenmemiş.</Text> :
+              wheelPrizes.map((p) => (
+                <View key={p.prize_id} style={s.listCard}><View style={s.listCardMain}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: p.color || '#E67E22', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                      <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700' }}>{p.type === 'points' ? 'P' : '🎁'}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}><Text style={s.listCardTitle}>{p.label}</Text>
+                      <Text style={s.listCardSub}>Tür: {p.type === 'points' ? 'Puan' : p.type === 'free_drink' ? 'Ücretsiz İçecek' : p.type} · Değer: {p.value} · Olasılık: %{p.probability}</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity onPress={() => deleteWheelPrize(p.prize_id)}><Feather name="trash-2" size={18} color="#D32F2F" /></TouchableOpacity>
+                </View></View>
+              ))}
+            <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
+              <Text style={s.modalTitle}>Yeni Çark Ödülü</Text>
+              <FormInput label="Ödül Adı" field="label" placeholder="25 Puan" />
+              <View style={s.formGroup}><Text style={s.formLabel}>Ödül Türü</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {[{ key: 'points', label: 'Puan' }, { key: 'free_drink', label: 'Ücretsiz İçecek' }, { key: 'discount', label: 'İndirim' }].map((t) => (
+                    <TouchableOpacity key={t.key} style={[s.typeChip, formData.type === t.key && s.typeChipActive]} onPress={() => setFormData({ ...formData, type: t.key })}>
+                      <Text style={[s.typeChipText, formData.type === t.key && s.typeChipTextActive]}>{t.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              <FormInput label="Değer" field="value" placeholder="25" kbType="numeric" />
+              <FormInput label="Olasılık (%)" field="probability" placeholder="15" kbType="numeric" />
+              <FormInput label="Renk (HEX)" field="color" placeholder="#E67E22" />
+              <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
+                <TouchableOpacity testID="confirm-add-wheel" style={s.confirmBtn} onPress={addWheelPrize}><Text style={s.confirmBtnText}>Ekle</Text></TouchableOpacity>
               </View>
             </View></View></Modal>
           </View>)}
