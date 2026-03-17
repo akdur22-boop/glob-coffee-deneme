@@ -366,6 +366,21 @@ backend:
         - agent: "testing"
         - comment: "✅ Scan settings update API working correctly. Successfully updated scan points from 50 to 75. Proper superadmin access control implemented. Returns confirmation message with new points value."
 
+  - task: "User Authentication System"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "User auth endpoints: POST /api/auth/register, POST /api/auth/login, GET /api/auth/me - Email/password registration and login system with session token management"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ USER AUTHENTICATION TESTING COMPLETED - ALL 7 TESTS PASSED (100% success rate). Tested: User registration (creates user with 100 points, Bronz tier), login with email/password, profile retrieval with Bearer token, duplicate email rejection (409), wrong password rejection (401), short password validation (400 - minimum 6 chars), invalid token handling (401). All endpoints working perfectly with proper Turkish error messages, session token management, data validation, and security measures. Password hashing working correctly. Users properly excluded from password_hash in responses. Ready for production use."
+
 frontend:
   - task: "Home Screen with Stories and Spin Wheel"
     implemented: true
@@ -424,3 +439,7 @@ agent_communication:
     - message: "Test the NEW backend auto-scan API endpoints for the Glob Coffee app. Test flow: 1) Admin login, 2) GET /api/admin/scan-settings, 3) Test POST /api/admin/scan-checkin with auto 50-point addition, 4) Test cooldown mechanism, 5) Test PUT /api/admin/scan-settings update, 6) Verify old add-points endpoint still works. All endpoints require admin Bearer token authentication."
     - agent: "testing"
     - message: "✅ NEW AUTO-SCAN API TESTING COMPLETED - ALL 6 TESTS PASSED (100% success rate). Tested: GET /api/admin/scan-settings (returns 50 points, 120min cooldown), POST /api/admin/scan-checkin (adds fixed 50 points automatically with proper Turkish message 'Otomatik 50 puan eklendi'), cooldown mechanism (prevents duplicate scans with remaining time message), PUT /api/admin/scan-settings (superadmin can update points 1-200), old add-points endpoint compatibility. All auto-scan endpoints working perfectly with proper authentication, Turkish language support, tier updates, notifications, and database persistence. Ready for production use."
+    - agent: "main"
+    - message: "Test the NEW user authentication endpoints for the Glob Coffee app. Backend runs at https://coffee-admin-portal.preview.emergentagent.com/api. Test Flow: 1) Register a new user (POST /api/auth/register), 2) Login with the new user (POST /api/auth/login), 3) Get user profile with token (GET /api/auth/me), 4) Test duplicate registration, 5) Test wrong password, 6) Test short password registration. All POST requests need Content-Type: application/json header."
+    - agent: "testing"
+    - message: "✅ USER AUTHENTICATION TESTING COMPLETED - ALL 7 TESTS PASSED (100% success rate). Tested: User registration (POST /api/auth/register - creates user with 100 points, Bronz tier, returns session_token), login (POST /api/auth/login - validates credentials, returns session_token), profile access (GET /api/auth/me with Bearer token - returns user data without password_hash), duplicate email validation (409 'Bu email adresi zaten kayıtlı'), wrong password handling (401 'Email veya şifre hatalı'), short password validation (400 'Şifre en az 6 karakter olmalı'), invalid token handling (401 'Geçersiz oturum'). All authentication endpoints working perfectly with proper Turkish error messages, session token management, security measures, and data validation. Backend authentication system is fully functional and production-ready."

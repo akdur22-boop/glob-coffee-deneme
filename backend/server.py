@@ -33,7 +33,7 @@ async def get_current_user(request: Request) -> dict:
     if isinstance(exp, str): exp = datetime.fromisoformat(exp)
     if exp.tzinfo is None: exp = exp.replace(tzinfo=timezone.utc)
     if exp < datetime.now(timezone.utc): raise HTTPException(401, "Oturum süresi dolmuş")
-    user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
+    user = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0, "password_hash": 0})
     if not user: raise HTTPException(401, "Kullanıcı bulunamadı")
     return user
 
@@ -78,6 +78,64 @@ async def exchange_session(request: Request, response: Response):
 @api_router.get("/auth/me")
 async def auth_me(request: Request):
     return await get_current_user(request)
+
+# ═══ USER: Email/Password Register & Login ═══
+@api_router.post("/auth/register")
+async def user_register(request: Request, response: Response):
+    body = await request.json()
+    name = body.get("name", "").strip()
+    email = body.get("email", "").strip().lower()
+    password = body.get("password", "")
+    if not name or not email or not password:
+        raise HTTPException(400, "Ad, email ve şifre gerekli")
+    if len(password) < 6:
+        raise HTTPException(400, "Şifre en az 6 karakter olmalı")
+    if "@" not in email:
+        raise HTTPException(400, "Geçerli bir email adresi girin")
+    existing = await db.users.find_one({"email": email}, {"_id": 0})
+    if existing:
+        raise HTTPException(409, "Bu email adresi zaten kayıtlı")
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    await db.users.insert_one({
+        "user_id": user_id, "email": email, "name": name,
+        "password_hash": hash_password(password),
+        "picture": "", "points": 100, "tier": "Bronz",
+        "created_at": datetime.now(timezone.utc)
+    })
+    st = str(uuid.uuid4())
+    await db.user_sessions.insert_one({
+        "user_id": user_id, "session_token": st,
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+        "created_at": datetime.now(timezone.utc)
+    })
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0, "password_hash": 0})
+    response.set_cookie(key="session_token", value=st, httponly=True, secure=True, samesite="none", path="/", max_age=604800)
+    return {"user": user, "session_token": st}
+
+@api_router.post("/auth/login")
+async def user_login(request: Request, response: Response):
+    body = await request.json()
+    email = body.get("email", "").strip().lower()
+    password = body.get("password", "")
+    if not email or not password:
+        raise HTTPException(400, "Email ve şifre gerekli")
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    if not user:
+        raise HTTPException(401, "Email veya şifre hatalı")
+    if not user.get("password_hash"):
+        raise HTTPException(401, "Bu hesap Google ile kayıt olmuş. Google ile giriş yapın.")
+    if user["password_hash"] != hash_password(password):
+        raise HTTPException(401, "Email veya şifre hatalı")
+    st = str(uuid.uuid4())
+    await db.user_sessions.delete_many({"user_id": user["user_id"]})
+    await db.user_sessions.insert_one({
+        "user_id": user["user_id"], "session_token": st,
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+        "created_at": datetime.now(timezone.utc)
+    })
+    safe_user = {k: v for k, v in user.items() if k != "password_hash"}
+    response.set_cookie(key="session_token", value=st, httponly=True, secure=True, samesite="none", path="/", max_age=604800)
+    return {"user": safe_user, "session_token": st}
 
 @api_router.post("/auth/logout")
 async def logout(request: Request, response: Response):

@@ -60,6 +60,10 @@ export default function WelcomeScreen() {
             <View style={s.googleIconWrap}><Text style={s.googleIcon}>G</Text></View>
             <Text style={s.googleButtonText}>Google ile Devam Et</Text>
           </TouchableOpacity>
+          <TouchableOpacity testID="email-login-btn" style={s.emailButton} activeOpacity={0.8} onPress={() => router.push('/auth')}>
+            <Feather name="mail" size={18} color="#F9F5F1" />
+            <Text style={s.emailButtonText}>Email ile Giriş Yap / Kayıt Ol</Text>
+          </TouchableOpacity>
           <TouchableOpacity testID="guest-browse-btn" style={s.guestButton} activeOpacity={0.8} onPress={() => router.replace('/(tabs)')}>
             <Text style={s.guestButtonText}>Misafir Olarak Göz At</Text>
           </TouchableOpacity>
@@ -91,6 +95,8 @@ const s = StyleSheet.create({
   googleIconWrap: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#4285F4', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
   googleIcon: { color: '#fff', fontWeight: '700', fontSize: 14 },
   googleButtonText: { fontSize: 16, fontWeight: '600', color: '#231F20' },
+  emailButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E67E22', paddingVertical: 16, borderRadius: 9999, marginBottom: 12, gap: 10 },
+  emailButtonText: { fontSize: 16, fontWeight: '600', color: '#F9F5F1' },
   guestButton: { alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 9999, borderWidth: 1.5, borderColor: 'rgba(249,245,241,0.3)', marginBottom: 24 },
   guestButtonText: { fontSize: 16, fontWeight: '600', color: '#F9F5F1' },
   terms: { textAlign: 'center', fontSize: 12, color: 'rgba(249,245,241,0.4)' },
