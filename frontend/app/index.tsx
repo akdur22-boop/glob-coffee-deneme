@@ -68,9 +68,6 @@ export default function WelcomeScreen() {
             <Text style={s.guestButtonText}>Misafir Olarak Göz At</Text>
           </TouchableOpacity>
           <Text style={s.terms}>Devam ederek Kullanım Şartlarını kabul edersiniz</Text>
-          <TouchableOpacity testID="admin-panel-link" style={s.adminLink} activeOpacity={0.8} onPress={() => router.push('/admin/login')}>
-            <Feather name="shield" size={14} color="rgba(249,245,241,0.4)" /><Text style={s.adminLinkText}>Admin Paneli</Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </View>

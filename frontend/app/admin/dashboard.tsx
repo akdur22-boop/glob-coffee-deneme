@@ -96,7 +96,10 @@ export default function AdminDashboard() {
     } catch { Alert.alert('Hata', 'Ürün eklenemedi'); }
   };
 
-  const deleteMenuItem = (id: string) => Alert.alert('Sil', 'Bu ürünü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/menu/${id}`, { method: 'DELETE', headers: headers() }); loadSection('menu'); } }]);
+  const deleteMenuItem = (id: string) => {
+    if (Platform.OS === 'web') { if (window.confirm('Bu ürünü silmek istiyor musunuz?')) { fetch(`${API_URL}/api/admin/menu/${id}`, { method: 'DELETE', headers: headers() }).then(() => loadSection('menu')); } }
+    else { Alert.alert('Sil', 'Bu ürünü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/menu/${id}`, { method: 'DELETE', headers: headers() }); loadSection('menu'); } }]); }
+  };
 
   const addCampaign = async () => {
     try {
@@ -105,7 +108,10 @@ export default function AdminDashboard() {
     } catch { Alert.alert('Hata', 'Kampanya oluşturulamadı'); }
   };
 
-  const deleteCampaign = (id: string) => Alert.alert('Sil', 'Bu kampanyayı silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/campaigns/${id}`, { method: 'DELETE', headers: headers() }); loadSection('campaigns'); } }]);
+  const deleteCampaign = (id: string) => {
+    if (Platform.OS === 'web') { if (window.confirm('Bu kampanyayı silmek istiyor musunuz?')) { fetch(`${API_URL}/api/admin/campaigns/${id}`, { method: 'DELETE', headers: headers() }).then(() => loadSection('campaigns')); } }
+    else { Alert.alert('Sil', 'Bu kampanyayı silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/campaigns/${id}`, { method: 'DELETE', headers: headers() }); loadSection('campaigns'); } }]); }
+  };
 
   const addStore = async () => {
     try {
@@ -114,7 +120,10 @@ export default function AdminDashboard() {
     } catch { Alert.alert('Hata', 'Şube eklenemedi'); }
   };
 
-  const deleteStore = (id: string) => Alert.alert('Sil', 'Bu şubeyi silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/stores/${id}`, { method: 'DELETE', headers: headers() }); loadSection('stores'); } }]);
+  const deleteStore = (id: string) => {
+    if (Platform.OS === 'web') { if (window.confirm('Bu şubeyi silmek istiyor musunuz?')) { fetch(`${API_URL}/api/admin/stores/${id}`, { method: 'DELETE', headers: headers() }).then(() => loadSection('stores')); } }
+    else { Alert.alert('Sil', 'Bu şubeyi silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/stores/${id}`, { method: 'DELETE', headers: headers() }); loadSection('stores'); } }]); }
+  };
 
   const addManager = async () => {
     try {
@@ -124,7 +133,10 @@ export default function AdminDashboard() {
     } catch { Alert.alert('Hata', 'Yetkili oluşturulamadı'); }
   };
 
-  const deleteManager = (id: string) => Alert.alert('Sil', 'Bu yetkiliyi silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/managers/${id}`, { method: 'DELETE', headers: headers() }); loadSection('managers'); } }]);
+  const deleteManager = (id: string) => {
+    if (Platform.OS === 'web') { if (window.confirm('Bu yetkiliyi silmek istiyor musunuz?')) { fetch(`${API_URL}/api/admin/managers/${id}`, { method: 'DELETE', headers: headers() }).then(() => loadSection('managers')); } }
+    else { Alert.alert('Sil', 'Bu yetkiliyi silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/managers/${id}`, { method: 'DELETE', headers: headers() }); loadSection('managers'); } }]); }
+  };
 
   const updateOrderStatus = (orderId: string, status: string) => {
     fetch(`${API_URL}/api/admin/orders/${orderId}/status`, { method: 'PUT', headers: headers(), body: JSON.stringify({ status }) }).then(() => loadSection('orders'));
@@ -180,7 +192,10 @@ export default function AdminDashboard() {
     } catch { Alert.alert('Hata', 'Ödül eklenemedi'); }
   };
 
-  const deleteReward = (id: string) => Alert.alert('Sil', 'Bu ödülü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/rewards/${id}`, { method: 'DELETE', headers: headers() }); loadSection('rewards'); } }]);
+  const deleteReward = (id: string) => {
+    if (Platform.OS === 'web') { if (window.confirm('Bu ödülü silmek istiyor musunuz?')) { fetch(`${API_URL}/api/admin/rewards/${id}`, { method: 'DELETE', headers: headers() }).then(() => loadSection('rewards')); } }
+    else { Alert.alert('Sil', 'Bu ödülü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/rewards/${id}`, { method: 'DELETE', headers: headers() }); loadSection('rewards'); } }]); }
+  };
 
   const addWheelPrize = async () => {
     try {
@@ -190,7 +205,10 @@ export default function AdminDashboard() {
     } catch { Alert.alert('Hata', 'Çark ödülü eklenemedi'); }
   };
 
-  const deleteWheelPrize = (id: string) => Alert.alert('Sil', 'Bu çark ödülünü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/wheel-prizes/${id}`, { method: 'DELETE', headers: headers() }); loadSection('wheel'); } }]);
+  const deleteWheelPrize = (id: string) => {
+    if (Platform.OS === 'web') { if (window.confirm('Bu çark ödülünü silmek istiyor musunuz?')) { fetch(`${API_URL}/api/admin/wheel-prizes/${id}`, { method: 'DELETE', headers: headers() }).then(() => loadSection('wheel')); } }
+    else { Alert.alert('Sil', 'Bu çark ödülünü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/wheel-prizes/${id}`, { method: 'DELETE', headers: headers() }); loadSection('wheel'); } }]); }
+  };
 
   // useCallback MUST be before any early returns (Rules of Hooks)
   const updateField = useCallback((field: string, value: string) => {
@@ -278,7 +296,7 @@ export default function AdminDashboard() {
             {menuItems.map((item) => (
               <View key={item.item_id} style={s.listCard}><View style={s.listCardMain}>
                 <View><Text style={s.listCardTitle}>{item.name}</Text><Text style={s.listCardSub}>{item.category} · ₺{item.price}</Text></View>
-                <TouchableOpacity testID={`delete-menu-${item.item_id}`} onPress={() => deleteMenuItem(item.item_id)}><Feather name="trash-2" size={18} color="#D32F2F" /></TouchableOpacity>
+                <TouchableOpacity testID={`delete-menu-${item.item_id}`} style={s.deleteBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={() => deleteMenuItem(item.item_id)}><Feather name="trash-2" size={20} color="#D32F2F" /></TouchableOpacity>
               </View></View>
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
@@ -305,7 +323,7 @@ export default function AdminDashboard() {
                 <View style={{ flex: 1 }}><Text style={s.listCardTitle}>{c.title}</Text><Text style={s.listCardSub}>{c.description}</Text>
                   <Text style={[s.listCardSub, { color: '#27AE60' }]}>{c.discount_type === 'percent' ? `%${c.discount_value} indirim` : `₺${c.discount_value} indirim`}{c.active ? ' · Aktif' : ' · Pasif'}</Text>
                 </View>
-                <TouchableOpacity onPress={() => deleteCampaign(c.campaign_id)}><Feather name="trash-2" size={18} color="#D32F2F" /></TouchableOpacity>
+                <TouchableOpacity style={s.deleteBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={() => deleteCampaign(c.campaign_id)}><Feather name="trash-2" size={20} color="#D32F2F" /></TouchableOpacity>
               </View></View>
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
@@ -403,7 +421,7 @@ export default function AdminDashboard() {
             {stores.map((st) => (
               <View key={st.store_id} style={s.listCard}><View style={s.listCardMain}>
                 <View style={{ flex: 1 }}><Text style={s.listCardTitle}>{st.name}</Text><Text style={s.listCardSub}>{st.address}, {st.city}</Text><Text style={s.listCardSub}>{st.hours} · {st.phone}</Text></View>
-                <TouchableOpacity onPress={() => deleteStore(st.store_id)}><Feather name="trash-2" size={18} color="#D32F2F" /></TouchableOpacity>
+                <TouchableOpacity style={s.deleteBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={() => deleteStore(st.store_id)}><Feather name="trash-2" size={20} color="#D32F2F" /></TouchableOpacity>
               </View></View>
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
@@ -428,7 +446,7 @@ export default function AdminDashboard() {
               managers.map((m) => (
                 <View key={m.admin_id} style={s.listCard}><View style={s.listCardMain}>
                   <View style={{ flex: 1 }}><Text style={s.listCardTitle}>{m.name}</Text><Text style={s.listCardSub}>{m.email}</Text><Text style={s.listCardSub}>Şube: {m.store_id || 'Atanmamış'}</Text></View>
-                  <TouchableOpacity onPress={() => deleteManager(m.admin_id)}><Feather name="trash-2" size={18} color="#D32F2F" /></TouchableOpacity>
+                  <TouchableOpacity style={s.deleteBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={() => deleteManager(m.admin_id)}><Feather name="trash-2" size={20} color="#D32F2F" /></TouchableOpacity>
                 </View></View>
               ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
@@ -474,7 +492,7 @@ export default function AdminDashboard() {
             {rewards.map((r) => (
               <View key={r.reward_id} style={s.listCard}><View style={s.listCardMain}>
                 <View style={{ flex: 1 }}><Text style={s.listCardTitle}>{r.name}</Text><Text style={s.listCardSub}>{r.description} · {r.points_required} puan</Text></View>
-                <TouchableOpacity onPress={() => deleteReward(r.reward_id)}><Feather name="trash-2" size={18} color="#D32F2F" /></TouchableOpacity>
+                <TouchableOpacity style={s.deleteBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={() => deleteReward(r.reward_id)}><Feather name="trash-2" size={20} color="#D32F2F" /></TouchableOpacity>
               </View></View>
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
@@ -505,7 +523,7 @@ export default function AdminDashboard() {
                       <Text style={s.listCardSub}>Tür: {p.type === 'points' ? 'Puan' : p.type === 'free_drink' ? 'Ücretsiz İçecek' : p.type} · Değer: {p.value} · Olasılık: %{p.probability}</Text>
                     </View>
                   </View>
-                  <TouchableOpacity onPress={() => deleteWheelPrize(p.prize_id)}><Feather name="trash-2" size={18} color="#D32F2F" /></TouchableOpacity>
+                  <TouchableOpacity style={s.deleteBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={() => deleteWheelPrize(p.prize_id)}><Feather name="trash-2" size={20} color="#D32F2F" /></TouchableOpacity>
                 </View></View>
               ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
@@ -573,6 +591,7 @@ const s = StyleSheet.create({
   listCardMain: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   listCardTitle: { fontSize: 15, fontWeight: '600', color: '#231F20' },
   listCardSub: { fontSize: 13, color: '#8A8A8A', marginTop: 2 },
+  deleteBtn: { padding: 10, borderRadius: 8, backgroundColor: '#FFF0F0', justifyContent: 'center', alignItems: 'center', minWidth: 40, minHeight: 40 },
   emptyText: { fontSize: 14, color: '#8A8A8A', textAlign: 'center', paddingVertical: 32 },
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
