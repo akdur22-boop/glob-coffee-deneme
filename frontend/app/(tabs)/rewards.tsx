@@ -28,14 +28,14 @@ export default function RewardsScreen() {
   const ti = (() => { const p = user?.points || 0; if (p >= 500) return { next: 'Maksimum seviye!', progress: 1 }; if (p >= 200) return { next: `Altın seviyeye ${500 - p} puan`, progress: p / 500 }; return { next: `Gümüş seviyeye ${200 - p} puan`, progress: p / 200 }; })();
   const iconFor = (c: string) => c === 'İçecek' ? 'coffee' : c === 'Yiyecek' ? 'box' : 'tag';
 
-  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
+  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#800020" /></View>;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}><Text style={styles.title}>Ödüller</Text></View>
       <View style={styles.tierCard}>
         <View style={styles.tierTop}>
-          <View style={styles.tierLeft}><View style={styles.tierIconWrap}><Feather name="award" size={28} color="#E67E22" /></View>
+          <View style={styles.tierLeft}><View style={styles.tierIconWrap}><Feather name="award" size={28} color="#800020" /></View>
             <View><Text style={styles.tierName}>{user?.tier || 'Bronz'} Üye</Text><Text style={styles.tierPoints}>{user?.points || 0} puan</Text></View>
           </View>
         </View>
@@ -44,7 +44,7 @@ export default function RewardsScreen() {
       </View>
       <View style={styles.howItWorks}><Text style={styles.howTitle}>Nasıl Çalışır?</Text>
         <View style={styles.howSteps}>
-          {[{ n: '1', t: 'Favori içeceğini sipariş ver', c: '#FEF0E1' }, { n: '2', t: 'Her ₺1 için 10 puan kazan', c: '#E8F5E9' }, { n: '3', t: 'Puanlarını ödüllere dönüştür', c: '#E3F2FD' }].map((s, i) => (
+          {[{ n: '1', t: 'Favori içeceğini sipariş ver', c: '#FFF0F2' }, { n: '2', t: 'Her ₺1 için 10 puan kazan', c: '#E8F5E9' }, { n: '3', t: 'Puanlarını ödüllere dönüştür', c: '#E3F2FD' }].map((s, i) => (
             <React.Fragment key={i}>
               {i > 0 && <View style={styles.howDivider} />}
               <View style={styles.howStep}><View style={[styles.howCircle, { backgroundColor: s.c }]}><Text style={styles.howNum}>{s.n}</Text></View><Text style={styles.howText}>{s.t}</Text></View>
@@ -56,8 +56,8 @@ export default function RewardsScreen() {
       <FlatList data={rewards} keyExtractor={(i) => i.reward_id} showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContent}
         renderItem={({ item }) => { const can = (user?.points || 0) >= item.points_required; return (
           <View style={styles.rewardCard}>
-            <View style={[styles.rewardIcon, { backgroundColor: can ? '#FEF0E1' : '#F0EAE4' }]}><Feather name={iconFor(item.category) as any} size={22} color={can ? '#E67E22' : '#8A8A8A'} /></View>
-            <View style={styles.rewardInfo}><Text style={styles.rewardName}>{item.name}</Text><Text style={styles.rewardDesc}>{item.description}</Text><Text style={[styles.rewardPts, { color: can ? '#E67E22' : '#8A8A8A' }]}>{item.points_required} puan</Text></View>
+            <View style={[styles.rewardIcon, { backgroundColor: can ? '#FFF0F2' : '#F0EAE4' }]}><Feather name={iconFor(item.category) as any} size={22} color={can ? '#800020' : '#8A8A8A'} /></View>
+            <View style={styles.rewardInfo}><Text style={styles.rewardName}>{item.name}</Text><Text style={styles.rewardDesc}>{item.description}</Text><Text style={[styles.rewardPts, { color: can ? '#800020' : '#8A8A8A' }]}>{item.points_required} puan</Text></View>
             <TouchableOpacity testID={`redeem-${item.reward_id}`} style={[styles.redeemBtn, !can && styles.redeemBtnDisabled]} activeOpacity={0.8} onPress={() => redeemReward(item)} disabled={!can || redeeming === item.reward_id}>
               {redeeming === item.reward_id ? <ActivityIndicator size="small" color="#F9F5F1" /> : <Text style={[styles.redeemText, !can && styles.redeemTextDisabled]}>Kullan</Text>}
             </TouchableOpacity>
@@ -72,9 +72,9 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 24, paddingTop: 8, paddingBottom: 16 }, title: { fontSize: 28, fontWeight: '700', color: '#231F20' },
   tierCard: { marginHorizontal: 24, backgroundColor: '#FFF', borderRadius: 20, padding: 24, marginBottom: 20, elevation: 3 },
   tierTop: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }, tierLeft: { flexDirection: 'row', alignItems: 'center' },
-  tierIconWrap: { width: 52, height: 52, borderRadius: 16, backgroundColor: 'rgba(230,126,34,0.12)', justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+  tierIconWrap: { width: 52, height: 52, borderRadius: 16, backgroundColor: 'rgba(128,0,32,0.12)', justifyContent: 'center', alignItems: 'center', marginRight: 14 },
   tierName: { fontSize: 18, fontWeight: '700', color: '#231F20' }, tierPoints: { fontSize: 14, color: '#8A8A8A', marginTop: 2 },
-  progressBar: { height: 8, backgroundColor: '#F0EAE4', borderRadius: 4, overflow: 'hidden' }, progressFill: { height: 8, backgroundColor: '#E67E22', borderRadius: 4 },
+  progressBar: { height: 8, backgroundColor: '#F0EAE4', borderRadius: 4, overflow: 'hidden' }, progressFill: { height: 8, backgroundColor: '#800020', borderRadius: 4 },
   progressLabel: { fontSize: 13, color: '#8A8A8A', marginTop: 8 },
   howItWorks: { marginHorizontal: 24, marginBottom: 24 }, howTitle: { fontSize: 16, fontWeight: '700', color: '#231F20', marginBottom: 12 },
   howSteps: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }, howStep: { alignItems: 'center', flex: 1 },

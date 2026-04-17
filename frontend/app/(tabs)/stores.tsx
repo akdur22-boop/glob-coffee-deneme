@@ -12,7 +12,7 @@ export default function StoresScreen() {
   useEffect(() => { loadStores(); }, []);
   const loadStores = async () => { try { const r = await fetch(`${API_URL}/api/stores`); if (r.ok) setStores(await r.json()); } catch {} finally { setLoading(false); } };
 
-  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
+  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#800020" /></View>;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

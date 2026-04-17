@@ -44,14 +44,14 @@ export default function WelcomeScreen() {
     } catch {} setAuthLoading(false);
   };
 
-  if (loading || authLoading) return <View style={s.loadWrap}><ActivityIndicator size="large" color="#E67E22" /><Text style={s.loadText}>{authLoading ? 'Giriş yapılıyor...' : 'Yükleniyor...'}</Text></View>;
+  if (loading || authLoading) return <View style={s.loadWrap}><ActivityIndicator size="large" color="#800020" /><Text style={s.loadText}>{authLoading ? 'Giriş yapılıyor...' : 'Yükleniyor...'}</Text></View>;
 
   return (
     <View style={s.container}>
       <Image source={{ uri: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800' }} style={s.bgImage} resizeMode="cover" />
       <View style={s.overlay} />
       <SafeAreaView style={s.content}>
-        <View style={s.topSection}><View style={s.badge}><Feather name="coffee" size={14} color="#E67E22" /><Text style={s.badgeText}>GLOB COFFEE</Text></View></View>
+        <View style={s.topSection}><View style={s.badge}><Feather name="coffee" size={14} color="#800020" /><Text style={s.badgeText}>GLOB COFFEE</Text></View></View>
         <View style={s.bottomSection}>
           <Text style={s.brand}>GLOB</Text>
           <Text style={s.brandSub}>COFFEE</Text>
@@ -86,16 +86,16 @@ const s = StyleSheet.create({
   content: { flex: 1, justifyContent: 'space-between', paddingHorizontal: 32 },
   topSection: { marginTop: 24, alignItems: 'flex-start' },
   badge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-  badgeText: { color: '#E67E22', fontSize: 12, fontWeight: '600', marginLeft: 6, letterSpacing: 2 },
+  badgeText: { color: '#800020', fontSize: 12, fontWeight: '600', marginLeft: 6, letterSpacing: 2 },
   bottomSection: { marginBottom: 48 },
   brand: { fontSize: 56, fontWeight: '900', color: '#F9F5F1', letterSpacing: 8, lineHeight: 60 },
-  brandSub: { fontSize: 56, fontWeight: '300', color: '#E67E22', letterSpacing: 12, lineHeight: 60, marginBottom: 12 },
+  brandSub: { fontSize: 56, fontWeight: '300', color: '#800020', letterSpacing: 12, lineHeight: 60, marginBottom: 12 },
   tagline: { fontSize: 16, color: 'rgba(249,245,241,0.7)', marginBottom: 40, letterSpacing: 0.5 },
   googleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9F5F1', paddingVertical: 16, borderRadius: 9999, marginBottom: 12 },
   googleIconWrap: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#4285F4', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
   googleIcon: { color: '#fff', fontWeight: '700', fontSize: 14 },
   googleButtonText: { fontSize: 16, fontWeight: '600', color: '#231F20' },
-  emailButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E67E22', paddingVertical: 16, borderRadius: 9999, marginBottom: 12, gap: 10 },
+  emailButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#800020', paddingVertical: 16, borderRadius: 9999, marginBottom: 12, gap: 10 },
   emailButtonText: { fontSize: 16, fontWeight: '600', color: '#F9F5F1' },
   guestButton: { alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 9999, borderWidth: 1.5, borderColor: 'rgba(249,245,241,0.3)', marginBottom: 24 },
   guestButtonText: { fontSize: 16, fontWeight: '600', color: '#F9F5F1' },

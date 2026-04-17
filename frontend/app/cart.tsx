@@ -56,7 +56,7 @@ export default function CartScreen() {
           ListFooterComponent={() => (<View>
             <Text style={styles.pickupLabel}>TESLİM ALMA ŞUBESİ</Text>
             <TouchableOpacity testID="select-store-btn" style={styles.storeSelector} activeOpacity={0.8} onPress={() => setShowStores(!showStores)}>
-              <View style={styles.storeSelectorLeft}><Feather name="map-pin" size={18} color="#E67E22" /><Text style={styles.storeSelectorText}>{selectedStore?.name || 'Şube seçin'}</Text></View>
+              <View style={styles.storeSelectorLeft}><Feather name="map-pin" size={18} color="#800020" /><Text style={styles.storeSelectorText}>{selectedStore?.name || 'Şube seçin'}</Text></View>
               <Feather name={showStores ? 'chevron-up' : 'chevron-down'} size={18} color="#8A8A8A" />
             </TouchableOpacity>
             {showStores && stores.map(s => (
@@ -88,22 +88,22 @@ const styles = StyleSheet.create({
   emptyWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 48 },
   emptyIcon: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#F0EAE4', justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
   emptyTitle: { fontSize: 22, fontWeight: '700', color: '#231F20', marginBottom: 8 }, emptyDesc: { fontSize: 15, color: '#8A8A8A', textAlign: 'center', marginBottom: 32 },
-  browseBtn: { backgroundColor: '#E67E22', paddingHorizontal: 32, paddingVertical: 16, borderRadius: 9999 }, browseBtnText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  browseBtn: { backgroundColor: '#800020', paddingHorizontal: 32, paddingVertical: 16, borderRadius: 9999 }, browseBtnText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
   listContent: { paddingHorizontal: 24, paddingBottom: 24 },
   cartItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 16, padding: 12, marginBottom: 12, elevation: 1 },
   cartImage: { width: 64, height: 64, borderRadius: 12 }, cartInfo: { flex: 1, marginLeft: 14 },
   cartName: { fontSize: 15, fontWeight: '600', color: '#231F20' }, cartSize: { fontSize: 13, color: '#8A8A8A', marginTop: 2 },
-  cartPrice: { fontSize: 16, fontWeight: '700', color: '#E67E22', marginTop: 4 },
+  cartPrice: { fontSize: 16, fontWeight: '700', color: '#800020', marginTop: 4 },
   removeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#FDE8E8', justifyContent: 'center', alignItems: 'center' },
   pickupLabel: { fontSize: 12, fontWeight: '700', color: '#8A8A8A', letterSpacing: 1, marginTop: 16, marginBottom: 10 },
   storeSelector: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFF', borderRadius: 12, padding: 16, borderWidth: 1, borderColor: '#E5E0DB' },
   storeSelectorLeft: { flexDirection: 'row', alignItems: 'center' }, storeSelectorText: { fontSize: 15, fontWeight: '500', color: '#231F20', marginLeft: 10 },
   storeOption: { backgroundColor: '#FFF', borderRadius: 12, padding: 14, marginTop: 8, borderWidth: 1, borderColor: '#E5E0DB' },
-  storeOptionActive: { borderColor: '#E67E22', backgroundColor: '#FEF0E1' }, storeOptionName: { fontSize: 14, fontWeight: '600', color: '#231F20' }, storeOptionAddr: { fontSize: 12, color: '#8A8A8A', marginTop: 2 },
+  storeOptionActive: { borderColor: '#800020', backgroundColor: '#FFF0F2' }, storeOptionName: { fontSize: 14, fontWeight: '600', color: '#231F20' }, storeOptionAddr: { fontSize: 12, color: '#8A8A8A', marginTop: 2 },
   summaryCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 20, marginTop: 20 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }, summaryLabel: { fontSize: 14, color: '#8A8A8A' }, summaryValue: { fontSize: 14, fontWeight: '600', color: '#231F20' },
   divider: { height: 1, backgroundColor: '#E5E0DB', marginVertical: 10 }, totalLabel: { fontSize: 16, fontWeight: '700', color: '#231F20' }, totalValue: { fontSize: 20, fontWeight: '800', color: '#231F20' },
   bottomBar: { backgroundColor: '#FFF', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8, borderTopWidth: 1, borderTopColor: '#E5E0DB' },
-  orderBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#E67E22', paddingVertical: 18, borderRadius: 9999 },
+  orderBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#800020', paddingVertical: 18, borderRadius: 9999 },
   orderBtnText: { color: '#FFF', fontSize: 17, fontWeight: '700' }, orderBtnPrice: { color: 'rgba(255,255,255,0.8)', fontSize: 17, fontWeight: '600', marginLeft: 8 },
 });

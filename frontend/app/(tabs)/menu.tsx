@@ -25,7 +25,7 @@ export default function MenuScreen() {
 
   const filtered = selectedCat === 'Tümü' ? items : items.filter((i) => i.category === selectedCat);
 
-  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
+  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#800020" /></View>;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -36,12 +36,14 @@ export default function MenuScreen() {
           {cart.length > 0 && <View style={styles.cartBadge}><Text style={styles.cartBadgeText}>{cart.length}</Text></View>}
         </TouchableOpacity>
       </View>
-      <FlatList horizontal data={categories} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScroll} keyExtractor={(item) => item}
-        renderItem={({ item: cat }) => (
-          <TouchableOpacity testID={`cat-${cat}`} style={[styles.catChip, selectedCat === cat && styles.catChipActive]} onPress={() => setSelectedCat(cat)} activeOpacity={0.8}>
-            <Text style={[styles.catText, selectedCat === cat && styles.catTextActive]}>{cat}</Text>
-          </TouchableOpacity>
-        )} />
+      <View style={styles.catWrap}>
+        <FlatList horizontal data={categories} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.catScroll} keyExtractor={(item) => item}
+          renderItem={({ item: cat }) => (
+            <TouchableOpacity testID={`cat-${cat}`} style={[styles.catChip, selectedCat === cat && styles.catChipActive]} onPress={() => setSelectedCat(cat)} activeOpacity={0.8}>
+              <Text style={[styles.catText, selectedCat === cat && styles.catTextActive]}>{cat}</Text>
+            </TouchableOpacity>
+          )} />
+      </View>
       <FlatList data={filtered} keyExtractor={(item) => item.item_id} showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <TouchableOpacity testID={`menu-item-${item.item_id}`} style={styles.itemCard} activeOpacity={0.85} onPress={() => router.push(`/item/${item.item_id}`)}>
@@ -49,7 +51,7 @@ export default function MenuScreen() {
             <View style={styles.itemInfo}>
               <View style={styles.itemTop}>
                 <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-                {item.popular && <View style={styles.popularBadge}><Feather name="trending-up" size={10} color="#E67E22" /><Text style={styles.popularText}>Popüler</Text></View>}
+                {item.popular && <View style={styles.popularBadge}><Feather name="trending-up" size={10} color="#800020" /><Text style={styles.popularText}>Popüler</Text></View>}
               </View>
               <Text style={styles.itemDesc} numberOfLines={2}>{item.description}</Text>
               <View style={styles.itemBottom}>
@@ -71,9 +73,10 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, paddingTop: 8, paddingBottom: 16 },
   title: { fontSize: 28, fontWeight: '700', color: '#231F20' },
   cartBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center', elevation: 2 },
-  cartBadge: { position: 'absolute', top: 4, right: 4, backgroundColor: '#E67E22', width: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
+  cartBadge: { position: 'absolute', top: 4, right: 4, backgroundColor: '#800020', width: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
   cartBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
-  catScroll: { paddingHorizontal: 24, marginBottom: 16 },
+  catScroll: { paddingHorizontal: 24, paddingBottom: 16, paddingTop: 4 },
+  catWrap: { marginBottom: 8 },
   catChip: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 24, backgroundColor: '#FFF', marginRight: 10, borderWidth: 1, borderColor: '#E5E0DB' },
   catChipActive: { backgroundColor: '#231F20', borderColor: '#231F20' },
   catText: { fontSize: 14, fontWeight: '600', color: '#5C5C5C' },
@@ -84,10 +87,10 @@ const styles = StyleSheet.create({
   itemInfo: { flex: 1, padding: 14, justifyContent: 'space-between' },
   itemTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   itemName: { fontSize: 16, fontWeight: '600', color: '#231F20', flex: 1 },
-  popularBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FEF0E1', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, marginLeft: 8 },
-  popularText: { fontSize: 10, fontWeight: '600', color: '#E67E22', marginLeft: 3 },
+  popularBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF0F2', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10, marginLeft: 8 },
+  popularText: { fontSize: 10, fontWeight: '600', color: '#800020', marginLeft: 3 },
   itemDesc: { fontSize: 13, color: '#8A8A8A', lineHeight: 18, marginTop: 4 },
   itemBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
-  itemPrice: { fontSize: 18, fontWeight: '700', color: '#E67E22' },
+  itemPrice: { fontSize: 18, fontWeight: '700', color: '#800020' },
   addBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#231F20', justifyContent: 'center', alignItems: 'center' },
 });

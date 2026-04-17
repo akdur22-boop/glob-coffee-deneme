@@ -184,7 +184,7 @@ export default function AdminDashboard() {
 
   const addWheelPrize = async () => {
     try {
-      const r = await fetch(`${API_URL}/api/admin/wheel-prizes`, { method: 'POST', headers: headers(), body: JSON.stringify({ label: formData.label || 'Hediye', type: formData.type || 'points', value: parseInt(formData.value || '10'), color: formData.color || '#E67E22', probability: parseFloat(formData.probability || '10') }) });
+      const r = await fetch(`${API_URL}/api/admin/wheel-prizes`, { method: 'POST', headers: headers(), body: JSON.stringify({ label: formData.label || 'Hediye', type: formData.type || 'points', value: parseInt(formData.value || '10'), color: formData.color || '#800020', probability: parseFloat(formData.probability || '10') }) });
       if (r.ok) { Alert.alert('Başarılı', 'Çark ödülü eklendi'); setShowForm(false); setFormData({}); loadSection('wheel'); }
       else { const e = await r.json(); Alert.alert('Hata', e.detail || 'Eklenemedi'); }
     } catch { Alert.alert('Hata', 'Çark ödülü eklenemedi'); }
@@ -192,10 +192,21 @@ export default function AdminDashboard() {
 
   const deleteWheelPrize = (id: string) => Alert.alert('Sil', 'Bu çark ödülünü silmek istiyor musunuz?', [{ text: 'İptal' }, { text: 'Sil', style: 'destructive', onPress: async () => { await fetch(`${API_URL}/api/admin/wheel-prizes/${id}`, { method: 'DELETE', headers: headers() }); loadSection('wheel'); } }]);
 
-  if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
+  // useCallback MUST be before any early returns (Rules of Hooks)
+  const updateField = useCallback((field: string, value: string) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const renderFormInput = (label: string, field: string, placeholder: string, kbType?: any) => (
+    <View style={s.formGroup} key={field}><Text style={s.formLabel}>{label}</Text>
+      <TextInput style={s.formInput} placeholder={placeholder} placeholderTextColor="#999" value={formData[field] || ''} onChangeText={(t) => updateField(field, t)} keyboardType={kbType || 'default'} />
+    </View>
+  );
+
+  if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#800020" /></View>;
 
   const menuItems_nav: { icon: string; label: string; key: Section; color: string }[] = [
-    { icon: 'home', label: 'Panel', key: 'home', color: '#E67E22' },
+    { icon: 'home', label: 'Panel', key: 'home', color: '#800020' },
     { icon: 'coffee', label: 'Menü', key: 'menu', color: '#8B4513' },
     { icon: 'tag', label: 'Kampanya', key: 'campaigns', color: '#27AE60' },
     { icon: 'bell', label: 'Bildirim', key: 'notifications', color: '#1976D2' },
@@ -210,17 +221,11 @@ export default function AdminDashboard() {
 
   const statusOptions = [
     { value: 'confirmed', label: 'Onaylandı', color: '#27AE60' },
-    { value: 'preparing', label: 'Hazırlanıyor', color: '#E67E22' },
+    { value: 'preparing', label: 'Hazırlanıyor', color: '#800020' },
     { value: 'ready', label: 'Hazır', color: '#1976D2' },
     { value: 'completed', label: 'Tamamlandı', color: '#5C6BC0' },
     { value: 'cancelled', label: 'İptal', color: '#D32F2F' },
   ];
-
-  const FormInput = ({ label, field, placeholder, kbType }: { label: string; field: string; placeholder: string; kbType?: any }) => (
-    <View style={s.formGroup}><Text style={s.formLabel}>{label}</Text>
-      <TextInput style={s.formInput} placeholder={placeholder} placeholderTextColor="#999" value={formData[field] || ''} onChangeText={(t) => setFormData({ ...formData, [field]: t })} keyboardType={kbType || 'default'} />
-    </View>
-  );
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
@@ -231,25 +236,27 @@ export default function AdminDashboard() {
       </View>
 
       {/* Nav */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.navScroll}>
-        {menuItems_nav.map((item) => (
-          <TouchableOpacity key={item.key} testID={`nav-${item.key}`} style={[s.navItem, section === item.key && { backgroundColor: item.color + '15' }]}
-            activeOpacity={0.8} onPress={() => { if (item.key === 'home') { setSection('home'); loadStats(token); } else loadSection(item.key); }}>
-            <Feather name={item.icon as any} size={18} color={section === item.key ? item.color : '#8A8A8A'} />
-            <Text style={[s.navLabel, section === item.key && { color: item.color }]}>{item.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={s.navWrap}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.navScroll}>
+          {menuItems_nav.map((item) => (
+            <TouchableOpacity key={item.key} testID={`nav-${item.key}`} style={[s.navItem, section === item.key && { backgroundColor: item.color + '20' }]}
+              activeOpacity={0.8} onPress={() => { if (item.key === 'home') { setSection('home'); loadStats(token); } else loadSection(item.key); }}>
+              <Feather name={item.icon as any} size={16} color={section === item.key ? item.color : '#8A8A8A'} />
+              <Text style={[s.navLabel, section === item.key && { color: item.color }]}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#E67E22" />} contentContainerStyle={s.contentPad}>
+        <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#800020" />} contentContainerStyle={s.contentPad}>
 
           {/* HOME */}
           {section === 'home' && stats && (<View>
             <Text style={s.sectionTitle}>Genel Bakış</Text>
             <View style={s.statsGrid}>
               {[
-                { label: 'Müşteriler', value: stats.total_users, icon: 'users', color: '#E67E22' },
+                { label: 'Müşteriler', value: stats.total_users, icon: 'users', color: '#800020' },
                 { label: 'Siparişler', value: stats.total_orders, icon: 'package', color: '#1976D2' },
                 { label: 'Gelir', value: `₺${stats.total_revenue}`, icon: 'trending-up', color: '#27AE60' },
                 { label: 'Menü Ürünü', value: stats.total_menu_items, icon: 'coffee', color: '#8B4513' },
@@ -276,12 +283,12 @@ export default function AdminDashboard() {
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Ürün Ekle</Text>
-              <FormInput label="İsim" field="name" placeholder="Ürün adı" />
-              <FormInput label="Açıklama" field="description" placeholder="Ürün açıklaması" />
-              <FormInput label="Fiyat (₺)" field="price" placeholder="45" kbType="numeric" />
-              <FormInput label="Kategori" field="category" placeholder="Espresso, Latte, vb." />
-              <FormInput label="Boyutlar (virgülle)" field="sizes" placeholder="Küçük, Orta, Büyük" />
-              <FormInput label="Görsel URL" field="image_url" placeholder="https://..." />
+              {renderFormInput("İsim", "name", "Ürün adı")}
+              {renderFormInput("Açıklama", "description", "Ürün açıklaması")}
+              {renderFormInput("Fiyat (₺)", "price", "45", "numeric")}
+              {renderFormInput("Kategori", "category", "Espresso, Latte, vb.")}
+              {renderFormInput("Boyutlar (virgülle)", "sizes", "Küçük, Orta, Büyük")}
+              {renderFormInput("Görsel URL", "image_url", "https://...")}
               <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
                 <TouchableOpacity testID="confirm-add-menu" style={s.confirmBtn} onPress={addMenuItem}><Text style={s.confirmBtnText}>Ekle</Text></TouchableOpacity>
               </View>
@@ -303,9 +310,9 @@ export default function AdminDashboard() {
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Kampanya</Text>
-              <FormInput label="Başlık" field="title" placeholder="Kampanya başlığı" />
-              <FormInput label="Açıklama" field="description" placeholder="Kampanya detayı" />
-              <FormInput label="İndirim Değeri" field="discount_value" placeholder="10" kbType="numeric" />
+              {renderFormInput("Başlık", "title", "Kampanya başlığı")}
+              {renderFormInput("Açıklama", "description", "Kampanya detayı")}
+              {renderFormInput("İndirim Değeri", "discount_value", "10", "numeric")}
               <View style={s.formGroup}><Text style={s.formLabel}>İndirim Türü</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   {['percent', 'fixed'].map((t) => (
@@ -350,14 +357,14 @@ export default function AdminDashboard() {
               <View style={s.scannerSection}>
                 {Platform.OS !== 'web' && (
                   <TouchableOpacity testID="start-scan-btn" style={s.scanButton} activeOpacity={0.8} onPress={() => setScanning(true)}>
-                    <Feather name="camera" size={32} color="#E67E22" />
+                    <Feather name="camera" size={32} color="#800020" />
                     <Text style={s.scanButtonText}>QR Kod Tara</Text>
                     <Text style={s.scanButtonSub}>Müşterinin telefonundaki QR kodu okutun</Text>
                   </TouchableOpacity>
                 )}
                 {Platform.OS === 'web' && (
                   <View style={s.scanButton}>
-                    <Feather name="smartphone" size={32} color="#E67E22" />
+                    <Feather name="smartphone" size={32} color="#800020" />
                     <Text style={s.scanButtonText}>QR Tarama</Text>
                     <Text style={s.scanButtonSub}>Kamera tarama mobil cihazda çalışır. Aşağıdan manuel ID girin.</Text>
                   </View>
@@ -401,11 +408,11 @@ export default function AdminDashboard() {
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Şube Ekle</Text>
-              <FormInput label="Şube Adı" field="name" placeholder="Glob Coffee — Taksim" />
-              <FormInput label="Adres" field="address" placeholder="İstiklal Cad. No:42" />
-              <FormInput label="Şehir" field="city" placeholder="İstanbul" />
-              <FormInput label="Çalışma Saatleri" field="hours" placeholder="08:00 - 22:00" />
-              <FormInput label="Telefon" field="phone" placeholder="(212) 555-0505" />
+              {renderFormInput("Şube Adı", "name", "Glob Coffee — Taksim")}
+              {renderFormInput("Adres", "address", "İstiklal Cad. No:42")}
+              {renderFormInput("Şehir", "city", "İstanbul")}
+              {renderFormInput("Çalışma Saatleri", "hours", "08:00 - 22:00")}
+              {renderFormInput("Telefon", "phone", "(212) 555-0505")}
               <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
                 <TouchableOpacity testID="confirm-add-store" style={s.confirmBtn} onPress={addStore}><Text style={s.confirmBtnText}>Ekle</Text></TouchableOpacity>
               </View>
@@ -426,10 +433,10 @@ export default function AdminDashboard() {
               ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Yetkili Oluştur</Text>
-              <FormInput label="İsim Soyisim" field="name" placeholder="Ahmet Yılmaz" />
-              <FormInput label="Email" field="email" placeholder="ahmet@globcoffee.com" />
-              <FormInput label="Şifre" field="password" placeholder="••••••••" />
-              <FormInput label="Şube ID (opsiyonel)" field="store_id" placeholder="store_001" />
+              {renderFormInput("İsim Soyisim", "name", "Ahmet Yılmaz")}
+              {renderFormInput("Email", "email", "ahmet@globcoffee.com")}
+              {renderFormInput("Şifre", "password", "••••••••")}
+              {renderFormInput("Şube ID (opsiyonel)", "store_id", "store_001")}
               <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
                 <TouchableOpacity testID="confirm-add-manager" style={s.confirmBtn} onPress={addManager}><Text style={s.confirmBtnText}>Oluştur</Text></TouchableOpacity>
               </View>
@@ -472,10 +479,10 @@ export default function AdminDashboard() {
             ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Ödül Ekle</Text>
-              <FormInput label="Ödül Adı" field="name" placeholder="Ücretsiz Latte" />
-              <FormInput label="Açıklama" field="description" placeholder="Bir adet latte hediye" />
-              <FormInput label="Gerekli Puan" field="points_required" placeholder="200" kbType="numeric" />
-              <FormInput label="Kategori" field="category" placeholder="İçecek, Yiyecek, vb." />
+              {renderFormInput("Ödül Adı", "name", "Ücretsiz Latte")}
+              {renderFormInput("Açıklama", "description", "Bir adet latte hediye")}
+              {renderFormInput("Gerekli Puan", "points_required", "200", "numeric")}
+              {renderFormInput("Kategori", "category", "İçecek, Yiyecek, vb.")}
               <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
                 <TouchableOpacity testID="confirm-add-reward" style={s.confirmBtn} onPress={addReward}><Text style={s.confirmBtnText}>Ekle</Text></TouchableOpacity>
               </View>
@@ -485,13 +492,13 @@ export default function AdminDashboard() {
           {/* WHEEL PRIZES */}
           {section === 'wheel' && (<View>
             <View style={s.sectionHeader}><Text style={s.sectionTitle}>Çark Ödülleri</Text>
-              <TouchableOpacity testID="add-wheel-btn" style={s.addButton} onPress={() => { setFormData({ type: 'points', color: '#E67E22' }); setShowForm(true); }}><Feather name="plus" size={18} color="#FFF" /><Text style={s.addButtonText}>Ekle</Text></TouchableOpacity>
+              <TouchableOpacity testID="add-wheel-btn" style={s.addButton} onPress={() => { setFormData({ type: 'points', color: '#800020' }); setShowForm(true); }}><Feather name="plus" size={18} color="#FFF" /><Text style={s.addButtonText}>Ekle</Text></TouchableOpacity>
             </View>
             {wheelPrizes.length === 0 ? <Text style={s.emptyText}>Henüz çark ödülü eklenmemiş.</Text> :
               wheelPrizes.map((p) => (
                 <View key={p.prize_id} style={s.listCard}><View style={s.listCardMain}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: p.color || '#E67E22', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                    <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: p.color || '#800020', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
                       <Text style={{ color: '#FFF', fontSize: 12, fontWeight: '700' }}>{p.type === 'points' ? 'P' : '🎁'}</Text>
                     </View>
                     <View style={{ flex: 1 }}><Text style={s.listCardTitle}>{p.label}</Text>
@@ -503,7 +510,7 @@ export default function AdminDashboard() {
               ))}
             <Modal visible={showForm} transparent animationType="slide"><View style={s.modalOverlay}><View style={s.modalContent}>
               <Text style={s.modalTitle}>Yeni Çark Ödülü</Text>
-              <FormInput label="Ödül Adı" field="label" placeholder="25 Puan" />
+              {renderFormInput("Ödül Adı", "label", "25 Puan")}
               <View style={s.formGroup}><Text style={s.formLabel}>Ödül Türü</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   {[{ key: 'points', label: 'Puan' }, { key: 'free_drink', label: 'Ücretsiz İçecek' }, { key: 'discount', label: 'İndirim' }].map((t) => (
@@ -513,9 +520,9 @@ export default function AdminDashboard() {
                   ))}
                 </View>
               </View>
-              <FormInput label="Değer" field="value" placeholder="25" kbType="numeric" />
-              <FormInput label="Olasılık (%)" field="probability" placeholder="15" kbType="numeric" />
-              <FormInput label="Renk (HEX)" field="color" placeholder="#E67E22" />
+              {renderFormInput("Değer", "value", "25", "numeric")}
+              {renderFormInput("Olasılık (%)", "probability", "15", "numeric")}
+              {renderFormInput("Renk (HEX)", "color", "#800020")}
               <View style={s.modalActions}><TouchableOpacity style={s.cancelBtn} onPress={() => setShowForm(false)}><Text style={s.cancelBtnText}>İptal</Text></TouchableOpacity>
                 <TouchableOpacity testID="confirm-add-wheel" style={s.confirmBtn} onPress={addWheelPrize}><Text style={s.confirmBtnText}>Ekle</Text></TouchableOpacity>
               </View>
@@ -548,9 +555,10 @@ const s = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12, backgroundColor: '#231F20' },
   adminLabel: { fontSize: 10, color: 'rgba(249,245,241,0.5)', fontWeight: '700', letterSpacing: 1 },
   adminName: { fontSize: 18, fontWeight: '700', color: '#F9F5F1' },
-  navScroll: { paddingHorizontal: 16, paddingVertical: 10, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#E5E0DB' },
-  navItem: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, marginRight: 6, flexDirection: 'row', alignItems: 'center' },
-  navLabel: { fontSize: 12, fontWeight: '600', color: '#8A8A8A', marginLeft: 5 },
+  navWrap: { backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#E5E0DB' },
+  navScroll: { paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center' },
+  navItem: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginRight: 4, flexDirection: 'row', alignItems: 'center' },
+  navLabel: { fontSize: 11, fontWeight: '600', color: '#8A8A8A', marginLeft: 4 },
   contentPad: { padding: 20 },
   sectionTitle: { fontSize: 22, fontWeight: '700', color: '#231F20', marginBottom: 16 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
@@ -559,7 +567,7 @@ const s = StyleSheet.create({
   statIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
   statValue: { fontSize: 24, fontWeight: '800', color: '#231F20' },
   statLabel: { fontSize: 12, color: '#8A8A8A', marginTop: 2 },
-  addButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E67E22', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
+  addButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#800020', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
   addButtonText: { color: '#FFF', fontSize: 14, fontWeight: '600', marginLeft: 6 },
   listCard: { backgroundColor: '#FFF', borderRadius: 14, padding: 16, marginBottom: 10, elevation: 1 },
   listCardMain: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -573,7 +581,7 @@ const s = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: 12, marginTop: 8 },
   cancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, borderWidth: 1, borderColor: '#E5E0DB', alignItems: 'center' },
   cancelBtnText: { fontSize: 15, fontWeight: '600', color: '#5C5C5C' },
-  confirmBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: '#E67E22', alignItems: 'center' },
+  confirmBtn: { flex: 1, paddingVertical: 14, borderRadius: 12, backgroundColor: '#800020', alignItems: 'center' },
   confirmBtnText: { fontSize: 15, fontWeight: '600', color: '#FFF' },
   // Forms
   formGroup: { marginBottom: 14 },
@@ -592,7 +600,7 @@ const s = StyleSheet.create({
   scanner: { flex: 1 },
   scanCloseBtn: { position: 'absolute', top: 12, right: 12, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
   scannerSection: { alignItems: 'center' },
-  scanButton: { width: '100%', backgroundColor: '#FFF', borderRadius: 16, padding: 32, alignItems: 'center', elevation: 2, borderWidth: 2, borderColor: '#E67E22', borderStyle: 'dashed', marginBottom: 16 },
+  scanButton: { width: '100%', backgroundColor: '#FFF', borderRadius: 16, padding: 32, alignItems: 'center', elevation: 2, borderWidth: 2, borderColor: '#800020', borderStyle: 'dashed', marginBottom: 16 },
   scanButtonText: { fontSize: 18, fontWeight: '700', color: '#231F20', marginTop: 12 },
   scanButtonSub: { fontSize: 13, color: '#8A8A8A', marginTop: 4 },
   orText: { fontSize: 14, color: '#8A8A8A', marginVertical: 12 },

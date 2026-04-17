@@ -23,10 +23,10 @@ export default function NotificationsScreen() {
   };
 
   const getIcon = (t: string) => t.includes('Sipariş') ? 'package' : t.includes('Ödül') || t.includes('Puan') ? 'gift' : 'bell';
-  const getColor = (t: string) => t.includes('Sipariş') ? '#1976D2' : t.includes('Ödül') || t.includes('Puan') ? '#27AE60' : '#E67E22';
+  const getColor = (t: string) => t.includes('Sipariş') ? '#1976D2' : t.includes('Ödül') || t.includes('Puan') ? '#27AE60' : '#800020';
   const timeAgo = (d: string) => { const m = Math.floor((Date.now() - new Date(d).getTime()) / 60000); if (m < 1) return 'Az önce'; if (m < 60) return `${m}dk önce`; const h = Math.floor(m / 60); if (h < 24) return `${h}sa önce`; return `${Math.floor(h / 24)}g önce`; };
 
-  if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
+  if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#800020" /></View>;
 
   return (
     <SafeAreaView style={s.container} edges={['top']}>
@@ -63,9 +63,9 @@ const s = StyleSheet.create({
   emptyTitle: { fontSize: 22, fontWeight: '700', color: '#231F20', marginBottom: 8 }, emptyDesc: { fontSize: 15, color: '#8A8A8A', textAlign: 'center' },
   listContent: { paddingHorizontal: 24, paddingBottom: 40 },
   card: { flexDirection: 'row', backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 12, elevation: 1 },
-  unread: { borderLeftWidth: 3, borderLeftColor: '#E67E22' },
+  unread: { borderLeftWidth: 3, borderLeftColor: '#800020' },
   icon: { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
   content: { flex: 1 }, top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardTitle: { fontSize: 15, fontWeight: '600', color: '#231F20' }, dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E67E22' },
+  cardTitle: { fontSize: 15, fontWeight: '600', color: '#231F20' }, dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#800020' },
   body: { fontSize: 13, color: '#5C5C5C', lineHeight: 19, marginTop: 4 }, time: { fontSize: 11, color: '#8A8A8A', marginTop: 6 },
 });

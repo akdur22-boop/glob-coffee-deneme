@@ -38,7 +38,7 @@ function QRCodeModal({ user, onClose }: { user: any; onClose: () => void }) {
               />
             ) : (
               <View style={qr.fallbackQR}>
-                <Feather name="maximize" size={64} color="#E67E22" />
+                <Feather name="maximize" size={64} color="#800020" />
                 <Text style={qr.fallbackText}>{user.user_id}</Text>
               </View>
             )}
@@ -47,7 +47,7 @@ function QRCodeModal({ user, onClose }: { user: any; onClose: () => void }) {
           <View style={qr.userInfo}>
             <Text style={qr.userName}>{user.name}</Text>
             <View style={qr.pointsRow}>
-              <Feather name="star" size={16} color="#E67E22" />
+              <Feather name="star" size={16} color="#800020" />
               <Text style={qr.pointsText}>{user.points} puan</Text>
               <View style={qr.tierBadge}>
                 <Text style={qr.tierText}>{user.tier}</Text>
@@ -193,7 +193,7 @@ function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: 
   };
 
   const rotateStr = rotation.interpolate({ inputRange: [0, 360], outputRange: ['0deg', '360deg'] });
-  const defaultColors = ['#E67E22', '#27AE60', '#1976D2', '#D32F2F', '#7B1FA2', '#FF6F00', '#00838F', '#C2185B'];
+  const defaultColors = ['#800020', '#27AE60', '#1976D2', '#D32F2F', '#7B1FA2', '#FF6F00', '#00838F', '#C2185B'];
 
   return (
     <Modal visible transparent animationType="fade">
@@ -207,7 +207,7 @@ function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: 
 
           {result ? (
             <View style={ws.resultWrap}>
-              <View style={ws.resultCircle}><Feather name="gift" size={48} color="#E67E22" /></View>
+              <View style={ws.resultCircle}><Feather name="gift" size={48} color="#800020" /></View>
               <Text style={ws.resultTitle}>Tebrikler!</Text>
               <Text style={ws.resultPrize}>{result.label}</Text>
               <TouchableOpacity style={ws.resultBtn} onPress={onClose}>
@@ -290,7 +290,7 @@ export default function HomeScreen() {
   const onRefresh = useCallback(async () => { setRefreshing(true); await loadData(); setRefreshing(false); }, [sessionToken]);
   const greeting = () => { const h = new Date().getHours(); if (h < 12) return 'Günaydın'; if (h < 17) return 'İyi Öğlenler'; return 'İyi Akşamlar'; };
 
-  if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
+  if (loading) return <View style={s.loadingWrap}><ActivityIndicator size="large" color="#800020" /></View>;
 
   const campaignImages: Record<string, string> = {};
   const defaultCampImages = [
@@ -319,7 +319,7 @@ export default function HomeScreen() {
         />
       )}
 
-      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#E67E22" />}>
+      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#800020" />}>
         {/* Header */}
         <View style={s.header}>
           <View>
@@ -369,7 +369,7 @@ export default function HomeScreen() {
                   <Text style={s.pointsValue}>{user.points} puan</Text>
                 </View>
                 <View style={s.tierBadge}>
-                  <Feather name="award" size={16} color="#E67E22" />
+                  <Feather name="award" size={16} color="#800020" />
                   <Text style={s.tierText}>{user.tier}</Text>
                 </View>
               </View>
@@ -398,7 +398,7 @@ export default function HomeScreen() {
         {/* Quick Actions */}
         <View style={s.quickActions}>
           {[
-            { icon: 'coffee', label: 'Sipariş', color: '#FEF0E1', ic: '#E67E22', route: '/(tabs)/menu' },
+            { icon: 'coffee', label: 'Sipariş', color: '#FFF0F2', ic: '#800020', route: '/(tabs)/menu' },
             { icon: 'gift', label: 'Ödüller', color: '#E8F5E9', ic: '#27AE60', route: '/(tabs)/rewards' },
             { icon: 'map-pin', label: 'Şubeler', color: '#E3F2FD', ic: '#1976D2', route: '/(tabs)/stores' },
             { icon: 'shopping-bag', label: 'Sepet', color: '#F3E5F5', ic: '#7B1FA2', route: '/cart' },
@@ -484,15 +484,15 @@ const qr = StyleSheet.create({
   closeBtn: { position: 'absolute', top: 16, right: 16, zIndex: 10 },
   title: { fontSize: 24, fontWeight: '800', color: '#231F20', marginBottom: 4 },
   subtitle: { fontSize: 14, color: '#8A8A8A', marginBottom: 24 },
-  codeWrap: { padding: 20, backgroundColor: '#FFF', borderRadius: 16, borderWidth: 2, borderColor: '#E67E22', marginBottom: 20 },
-  fallbackQR: { width: 200, height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FEF0E1', borderRadius: 12 },
+  codeWrap: { padding: 20, backgroundColor: '#FFF', borderRadius: 16, borderWidth: 2, borderColor: '#800020', marginBottom: 20 },
+  fallbackQR: { width: 200, height: 200, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFF0F2', borderRadius: 12 },
   fallbackText: { fontSize: 11, color: '#8A8A8A', marginTop: 8, textAlign: 'center' },
   userInfo: { alignItems: 'center', marginBottom: 16 },
   userName: { fontSize: 18, fontWeight: '700', color: '#231F20', marginBottom: 8 },
   pointsRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   pointsText: { fontSize: 15, fontWeight: '600', color: '#231F20' },
-  tierBadge: { backgroundColor: '#FEF0E1', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
-  tierText: { fontSize: 12, fontWeight: '700', color: '#E67E22' },
+  tierBadge: { backgroundColor: '#FFF0F2', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12 },
+  tierText: { fontSize: 12, fontWeight: '700', color: '#800020' },
   hint: { fontSize: 12, color: '#8A8A8A', textAlign: 'center', lineHeight: 18 },
 });
 
@@ -508,7 +508,7 @@ const sv = StyleSheet.create({
   closeBtn: { alignSelf: 'flex-end', width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'center', alignItems: 'center' },
   touchArea: { flex: 1, justifyContent: 'flex-end' },
   contentArea: { paddingHorizontal: 24, paddingBottom: 80 },
-  badge: { alignSelf: 'flex-start', backgroundColor: 'rgba(230,126,34,0.9)', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, marginBottom: 16 },
+  badge: { alignSelf: 'flex-start', backgroundColor: 'rgba(128,0,32,0.9)', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, marginBottom: 16 },
   badgeText: { fontSize: 14, fontWeight: '800', color: '#FFF', letterSpacing: 0.5 },
   storyTitle: { fontSize: 32, fontWeight: '800', color: '#FFF', marginBottom: 8, textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 },
   storyDesc: { fontSize: 16, color: 'rgba(255,255,255,0.85)', lineHeight: 24, textShadowColor: 'rgba(0,0,0,0.3)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3 },
@@ -527,12 +527,12 @@ const ws = StyleSheet.create({
   slice: { position: 'absolute', top: 0, left: 0, justifyContent: 'center' },
   sliceInner: { width: '50%', height: '100%', justifyContent: 'center', paddingLeft: 16 },
   sliceLabel: { color: '#FFF', fontSize: 11, fontWeight: '700' },
-  spinBtn: { backgroundColor: '#E67E22', width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginTop: 20, borderWidth: 3, borderColor: '#FFF', elevation: 4 },
+  spinBtn: { backgroundColor: '#800020', width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginTop: 20, borderWidth: 3, borderColor: '#FFF', elevation: 4 },
   spinBtnText: { color: '#FFF', fontSize: 14, fontWeight: '800' },
   resultWrap: { alignItems: 'center', paddingVertical: 20 },
-  resultCircle: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FEF0E1', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  resultCircle: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFF0F2', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
   resultTitle: { fontSize: 28, fontWeight: '800', color: '#231F20', marginBottom: 8 },
-  resultPrize: { fontSize: 20, fontWeight: '700', color: '#E67E22', marginBottom: 24 },
+  resultPrize: { fontSize: 20, fontWeight: '700', color: '#800020', marginBottom: 24 },
   resultBtn: { backgroundColor: '#231F20', paddingHorizontal: 40, paddingVertical: 14, borderRadius: 9999 },
   resultBtnText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
 });
@@ -547,7 +547,7 @@ const s = StyleSheet.create({
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   greeting: { fontSize: 14, color: '#8A8A8A', fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' },
   userName: { fontSize: 28, fontWeight: '700', color: '#231F20', letterSpacing: -0.5, marginTop: 2 },
-  wheelBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FEF0E1', justifyContent: 'center', alignItems: 'center' },
+  wheelBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFF0F2', justifyContent: 'center', alignItems: 'center' },
   notifBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center', elevation: 2 },
   badge: { position: 'absolute', top: 6, right: 6, backgroundColor: '#D32F2F', width: 18, height: 18, borderRadius: 9, justifyContent: 'center', alignItems: 'center' },
   badgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
@@ -555,7 +555,7 @@ const s = StyleSheet.create({
   // Stories
   storiesScroll: { paddingHorizontal: 20, paddingVertical: 12 },
   storyItem: { alignItems: 'center', marginRight: 16, width: 72 },
-  storyRing: { width: 68, height: 68, borderRadius: 34, padding: 3, borderWidth: 2.5, borderColor: '#E67E22', justifyContent: 'center', alignItems: 'center' },
+  storyRing: { width: 68, height: 68, borderRadius: 34, padding: 3, borderWidth: 2.5, borderColor: '#800020', justifyContent: 'center', alignItems: 'center' },
   storyImage: { width: 56, height: 56, borderRadius: 28 },
   storyLabel: { fontSize: 11, fontWeight: '600', color: '#5C5C5C', marginTop: 6, textAlign: 'center' },
 
@@ -565,13 +565,13 @@ const s = StyleSheet.create({
   pointsTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   pointsLabel: { fontSize: 12, color: 'rgba(249,245,241,0.5)', fontWeight: '600', letterSpacing: 1 },
   pointsValue: { fontSize: 36, fontWeight: '800', color: '#F9F5F1', marginTop: 4 },
-  tierBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(230,126,34,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-  tierText: { color: '#E67E22', fontSize: 13, fontWeight: '700', marginLeft: 6 },
+  tierBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(128,0,32,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  tierText: { color: '#800020', fontSize: 13, fontWeight: '700', marginLeft: 6 },
   pointsBar: { height: 6, backgroundColor: 'rgba(249,245,241,0.15)', borderRadius: 3, overflow: 'hidden' },
-  pointsFill: { height: 6, backgroundColor: '#E67E22', borderRadius: 3 },
+  pointsFill: { height: 6, backgroundColor: '#800020', borderRadius: 3 },
   pointsHint: { fontSize: 13, color: 'rgba(249,245,241,0.5)', marginTop: 10 },
 
-  qrButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E67E22', borderRadius: 16, padding: 16 },
+  qrButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#800020', borderRadius: 16, padding: 16 },
   qrIconWrap: { width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center', marginRight: 14 },
   qrTextWrap: { flex: 1 },
   qrTitle: { fontSize: 16, fontWeight: '700', color: '#FFF' },
@@ -586,7 +586,7 @@ const s = StyleSheet.create({
   // Section
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginBottom: 16 },
   sectionTitle: { fontSize: 22, fontWeight: '700', color: '#231F20' },
-  seeAll: { fontSize: 14, fontWeight: '600', color: '#E67E22' },
+  seeAll: { fontSize: 14, fontWeight: '600', color: '#800020' },
 
   // Featured
   featuredScroll: { paddingLeft: 24, paddingRight: 8 },
@@ -594,7 +594,7 @@ const s = StyleSheet.create({
   featuredImage: { width: '100%', height: 140 },
   featuredInfo: { padding: 12 },
   featuredName: { fontSize: 15, fontWeight: '600', color: '#231F20', marginBottom: 4 },
-  featuredPrice: { fontSize: 16, fontWeight: '700', color: '#E67E22' },
+  featuredPrice: { fontSize: 16, fontWeight: '700', color: '#800020' },
 
   // Campaign Slider
   campaignSection: { marginTop: 24 },
@@ -604,7 +604,7 @@ const s = StyleSheet.create({
   campaignImage: { width: '100%', height: '100%', position: 'absolute' },
   campaignOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)', borderRadius: 20 },
   campaignContent: { flex: 1, justifyContent: 'flex-end', padding: 20 },
-  campaignBadge: { alignSelf: 'flex-start', backgroundColor: 'rgba(230,126,34,0.9)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, marginBottom: 8 },
+  campaignBadge: { alignSelf: 'flex-start', backgroundColor: 'rgba(128,0,32,0.9)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, marginBottom: 8 },
   campaignBadgeText: { fontSize: 12, fontWeight: '800', color: '#FFF' },
   campaignTitle: { fontSize: 20, fontWeight: '800', color: '#FFF', marginBottom: 4 },
   campaignDesc: { fontSize: 13, color: 'rgba(255,255,255,0.8)', lineHeight: 18 },

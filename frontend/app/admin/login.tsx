@@ -35,7 +35,7 @@ export default function AdminLoginScreen() {
           <Feather name="arrow-left" size={24} color="#F9F5F1" />
         </TouchableOpacity>
         <View style={s.header}>
-          <View style={s.iconWrap}><Feather name="shield" size={32} color="#E67E22" /></View>
+          <View style={s.iconWrap}><Feather name="shield" size={32} color="#800020" /></View>
           <Text style={s.title}>Admin Paneli</Text>
           <Text style={s.subtitle}>Glob Coffee Yönetim Sistemi</Text>
         </View>
@@ -64,13 +64,13 @@ const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#231F20' }, content: { flex: 1, justifyContent: 'center', paddingHorizontal: 32 },
   backBtn: { position: 'absolute', top: 16, left: 24, width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.1)', justifyContent: 'center', alignItems: 'center' },
   header: { alignItems: 'center', marginBottom: 40 },
-  iconWrap: { width: 72, height: 72, borderRadius: 20, backgroundColor: 'rgba(230,126,34,0.15)', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  iconWrap: { width: 72, height: 72, borderRadius: 20, backgroundColor: 'rgba(128,0,32,0.15)', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
   title: { fontSize: 28, fontWeight: '800', color: '#F9F5F1', letterSpacing: -0.5 },
   subtitle: { fontSize: 14, color: 'rgba(249,245,241,0.5)', marginTop: 8 },
   form: {},
   label: { fontSize: 12, fontWeight: '700', color: 'rgba(249,245,241,0.5)', letterSpacing: 1, marginBottom: 8 },
   inputWrap: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, paddingHorizontal: 16, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   input: { flex: 1, height: 52, color: '#F9F5F1', fontSize: 16, marginLeft: 12 },
-  loginBtn: { backgroundColor: '#E67E22', paddingVertical: 18, borderRadius: 9999, alignItems: 'center', marginTop: 8 },
+  loginBtn: { backgroundColor: '#800020', paddingVertical: 18, borderRadius: 9999, alignItems: 'center', marginTop: 8 },
   loginBtnText: { color: '#FFF', fontSize: 17, fontWeight: '700' },
 });

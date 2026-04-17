@@ -31,7 +31,7 @@ export default function TabLayout() {
   return (
     <AppProvider>
       <Tabs screenOptions={{
-        headerShown: false, tabBarActiveTintColor: '#E67E22', tabBarInactiveTintColor: '#8A8A8A',
+        headerShown: false, tabBarActiveTintColor: '#800020', tabBarInactiveTintColor: '#8A8A8A',
         tabBarStyle: { backgroundColor: '#FFF', borderTopColor: '#E5E0DB', borderTopWidth: 1, height: Platform.OS === 'ios' ? 88 : 64, paddingBottom: Platform.OS === 'ios' ? 28 : 8, paddingTop: 8 },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600', letterSpacing: 0.3 },
       }}>

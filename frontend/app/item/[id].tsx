@@ -36,7 +36,7 @@ export default function ItemDetailScreen() {
     ]);
   };
 
-  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#E67E22" /></View>;
+  if (loading) return <View style={styles.loadingWrap}><ActivityIndicator size="large" color="#800020" /></View>;
   if (!item) return <View style={styles.loadingWrap}><Text style={{ color: '#8A8A8A' }}>Ürün bulunamadı</Text></View>;
 
   return (
@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
   image: { width: '100%', height: 320 },
   backBtn: { position: 'absolute', top: 52, left: 20, width: 40, height: 40, borderRadius: 20, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center', elevation: 3 },
   content: { padding: 24 },
-  categoryBadge: { alignSelf: 'flex-start', backgroundColor: '#FEF0E1', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, marginBottom: 12 },
-  categoryText: { fontSize: 12, fontWeight: '600', color: '#E67E22', textTransform: 'uppercase', letterSpacing: 0.5 },
+  categoryBadge: { alignSelf: 'flex-start', backgroundColor: '#FFF0F2', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, marginBottom: 12 },
+  categoryText: { fontSize: 12, fontWeight: '600', color: '#800020', textTransform: 'uppercase', letterSpacing: 0.5 },
   itemName: { fontSize: 28, fontWeight: '700', color: '#231F20', marginBottom: 8 },
   itemDesc: { fontSize: 16, color: '#5C5C5C', lineHeight: 24, marginBottom: 24 },
   section: { marginBottom: 24 }, sectionLabel: { fontSize: 12, fontWeight: '700', color: '#8A8A8A', letterSpacing: 1, marginBottom: 12 },
@@ -96,6 +96,6 @@ const styles = StyleSheet.create({
   qtyText: { fontSize: 20, fontWeight: '700', color: '#231F20', marginHorizontal: 24 },
   bottomBar: { backgroundColor: '#FFF', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8, borderTopWidth: 1, borderTopColor: '#E5E0DB' },
   priceLabel: { fontSize: 12, color: '#8A8A8A' }, priceValue: { fontSize: 24, fontWeight: '800', color: '#231F20' },
-  addBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E67E22', paddingHorizontal: 28, paddingVertical: 16, borderRadius: 9999 },
+  addBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#800020', paddingHorizontal: 28, paddingVertical: 16, borderRadius: 9999 },
   addBtnText: { color: '#F9F5F1', fontSize: 16, fontWeight: '600', marginLeft: 8 },
 });

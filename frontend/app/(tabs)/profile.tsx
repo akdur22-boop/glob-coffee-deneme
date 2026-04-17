@@ -62,14 +62,14 @@ export default function ProfileScreen() {
             { icon: 'qr-code' as any, label: 'QR Kodum', onPress: () => Alert.alert('QR Kodunuz', `Kullanıcı ID: ${user.user_id}\n\nBu kodu şubede göstererek puan kazanabilirsiniz.`) },
           ].map((link, i) => (
             <TouchableOpacity key={i} testID={`profile-link-${i}`} style={styles.linkRow} activeOpacity={0.8} onPress={link.onPress}>
-              <View style={styles.linkLeft}><View style={styles.linkIcon}><Feather name={link.icon === 'qr-code' ? 'maximize' : link.icon} size={18} color="#E67E22" /></View><Text style={styles.linkLabel}>{link.label}</Text></View>
+              <View style={styles.linkLeft}><View style={styles.linkIcon}><Feather name={link.icon === 'qr-code' ? 'maximize' : link.icon} size={18} color="#800020" /></View><Text style={styles.linkLabel}>{link.label}</Text></View>
               <Feather name="chevron-right" size={18} color="#8A8A8A" />
             </TouchableOpacity>
           ))}
         </View>
         <View style={styles.ordersSection}>
           <Text style={styles.sectionTitle}>Son Siparişler</Text>
-          {loading ? <ActivityIndicator color="#E67E22" /> : orders.length === 0 ? <Text style={styles.noOrders}>Henüz sipariş yok. Kahve zamanı!</Text> :
+          {loading ? <ActivityIndicator color="#800020" /> : orders.length === 0 ? <Text style={styles.noOrders}>Henüz sipariş yok. Kahve zamanı!</Text> :
             orders.slice(0, 5).map((order) => (
               <View key={order.order_id} style={styles.orderCard}>
                 <View style={styles.orderTop}><View><Text style={styles.orderStore}>{order.store_name}</Text><Text style={styles.orderDate}>{new Date(order.created_at).toLocaleDateString('tr-TR')}</Text></View>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   loginBtnText: { color: '#F9F5F1', fontSize: 16, fontWeight: '600' },
   userCard: { marginHorizontal: 24, backgroundColor: '#FFF', borderRadius: 24, padding: 28, alignItems: 'center', marginBottom: 24, elevation: 4 },
   avatar: { width: 80, height: 80, borderRadius: 40, marginBottom: 16 },
-  avatarPlaceholder: { backgroundColor: '#E67E22', justifyContent: 'center', alignItems: 'center' },
+  avatarPlaceholder: { backgroundColor: '#800020', justifyContent: 'center', alignItems: 'center' },
   avatarLetter: { fontSize: 32, fontWeight: '700', color: '#FFF' },
   userName: { fontSize: 22, fontWeight: '700', color: '#231F20', marginBottom: 4 },
   userEmail: { fontSize: 14, color: '#8A8A8A', marginBottom: 20 },
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   linksSection: { marginHorizontal: 24, backgroundColor: '#FFF', borderRadius: 16, overflow: 'hidden', marginBottom: 24 },
   linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#F0EAE4' },
   linkLeft: { flexDirection: 'row', alignItems: 'center' },
-  linkIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#FEF0E1', justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+  linkIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#FFF0F2', justifyContent: 'center', alignItems: 'center', marginRight: 14 },
   linkLabel: { fontSize: 15, fontWeight: '500', color: '#231F20' },
   ordersSection: { paddingHorizontal: 24 },
   sectionTitle: { fontSize: 20, fontWeight: '700', color: '#231F20', marginBottom: 16 },
@@ -119,5 +119,5 @@ const styles = StyleSheet.create({
   orderStatus: { backgroundColor: '#E8F5E9', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   orderStatusText: { fontSize: 12, fontWeight: '600', color: '#27AE60', textTransform: 'capitalize' },
   orderBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  orderItems: { fontSize: 13, color: '#8A8A8A' }, orderTotal: { fontSize: 16, fontWeight: '700', color: '#E67E22' },
+  orderItems: { fontSize: 13, color: '#8A8A8A' }, orderTotal: { fontSize: 16, fontWeight: '700', color: '#800020' },
 });

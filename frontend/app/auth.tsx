@@ -87,7 +87,7 @@ export default function AuthScreen() {
             {/* Logo */}
             <View style={s.logoSection}>
               <View style={s.logoBadge}>
-                <Feather name="coffee" size={18} color="#E67E22" />
+                <Feather name="coffee" size={18} color="#800020" />
                 <Text style={s.logoBadgeText}>GLOB COFFEE</Text>
               </View>
             </View>
@@ -257,7 +257,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
     paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
   },
-  logoBadgeText: { color: '#E67E22', fontSize: 16, fontWeight: '700', marginLeft: 8, letterSpacing: 2 },
+  logoBadgeText: { color: '#800020', fontSize: 16, fontWeight: '700', marginLeft: 8, letterSpacing: 2 },
 
   formCard: {
     backgroundColor: '#FFF', borderRadius: 24, padding: 24,
@@ -272,7 +272,7 @@ const s = StyleSheet.create({
   tab: {
     flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center',
   },
-  tabActive: { backgroundColor: '#E67E22' },
+  tabActive: { backgroundColor: '#800020' },
   tabText: { fontSize: 15, fontWeight: '600', color: '#8A8A8A' },
   tabTextActive: { color: '#FFF' },
 
@@ -291,14 +291,14 @@ const s = StyleSheet.create({
   eyeBtn: { paddingHorizontal: 14 },
 
   submitBtn: {
-    backgroundColor: '#E67E22', borderRadius: 14,
+    backgroundColor: '#800020', borderRadius: 14,
     paddingVertical: 16, alignItems: 'center', marginTop: 8,
   },
   submitBtnText: { fontSize: 16, fontWeight: '700', color: '#FFF' },
 
   switchBtn: { alignItems: 'center', marginTop: 20 },
   switchText: { fontSize: 14, color: '#8A8A8A' },
-  switchLink: { color: '#E67E22', fontWeight: '700' },
+  switchLink: { color: '#800020', fontWeight: '700' },
 
   guestBtn: { alignItems: 'center', marginTop: 24, marginBottom: 32 },
   guestText: { fontSize: 14, color: 'rgba(249,245,241,0.6)', fontWeight: '500' },
