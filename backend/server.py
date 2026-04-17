@@ -41,12 +41,13 @@ async def get_admin_user(request: Request) -> dict:
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "): raise HTTPException(401, "Giriş yapılmamış")
     token = auth.split(" ")[1]
-    session = await db.admin_sessions.find_one({"session_token": token}, {"_id": 0})
+    session = await db.admin_sessions.find_one({"$or": [{"session_token": token}, {"token": token}]}, {"_id": 0})
     if not session: raise HTTPException(401, "Geçersiz admin oturumu")
-    exp = session["expires_at"]
-    if isinstance(exp, str): exp = datetime.fromisoformat(exp)
-    if exp.tzinfo is None: exp = exp.replace(tzinfo=timezone.utc)
-    if exp < datetime.now(timezone.utc): raise HTTPException(401, "Oturum süresi dolmuş")
+    exp = session.get("expires_at")
+    if exp:
+        if isinstance(exp, str): exp = datetime.fromisoformat(exp)
+        if exp.tzinfo is None: exp = exp.replace(tzinfo=timezone.utc)
+        if exp < datetime.now(timezone.utc): raise HTTPException(401, "Oturum süresi dolmuş")
     admin = await db.admins.find_one({"admin_id": session["admin_id"]}, {"_id": 0})
     if not admin: raise HTTPException(401, "Admin bulunamadı")
     return admin
@@ -119,23 +120,36 @@ async def user_login(request: Request, response: Response):
     password = body.get("password", "")
     if not email or not password:
         raise HTTPException(400, "Email ve şifre gerekli")
+    # Önce normal kullanıcı tablosunda ara
     user = await db.users.find_one({"email": email}, {"_id": 0})
-    if not user:
-        raise HTTPException(401, "Email veya şifre hatalı")
-    if not user.get("password_hash"):
-        raise HTTPException(401, "Bu hesap Google ile kayıt olmuş. Google ile giriş yapın.")
-    if user["password_hash"] != hash_password(password):
-        raise HTTPException(401, "Email veya şifre hatalı")
-    st = str(uuid.uuid4())
-    await db.user_sessions.delete_many({"user_id": user["user_id"]})
-    await db.user_sessions.insert_one({
-        "user_id": user["user_id"], "session_token": st,
-        "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
-        "created_at": datetime.now(timezone.utc)
-    })
-    safe_user = {k: v for k, v in user.items() if k != "password_hash"}
-    response.set_cookie(key="session_token", value=st, httponly=True, secure=True, samesite="none", path="/", max_age=604800)
-    return {"user": safe_user, "session_token": st}
+    if user:
+        if not user.get("password_hash"):
+            raise HTTPException(401, "Bu hesap Google ile kayıt olmuş. Google ile giriş yapın.")
+        if user["password_hash"] != hash_password(password):
+            raise HTTPException(401, "Email veya şifre hatalı")
+        st = str(uuid.uuid4())
+        await db.user_sessions.delete_many({"user_id": user["user_id"]})
+        await db.user_sessions.insert_one({
+            "user_id": user["user_id"], "session_token": st,
+            "expires_at": datetime.now(timezone.utc) + timedelta(days=7),
+            "created_at": datetime.now(timezone.utc)
+        })
+        safe_user = {k: v for k, v in user.items() if k != "password_hash"}
+        response.set_cookie(key="session_token", value=st, httponly=True, secure=True, samesite="none", path="/", max_age=604800)
+        return {"user": safe_user, "session_token": st, "role": "user"}
+    # Kullanıcı bulunamadı — admin tablosunda ara
+    admin = await db.admins.find_one({"email": email}, {"_id": 0})
+    if admin:
+        if admin.get("password_hash") != hash_password(password):
+            raise HTTPException(401, "Email veya şifre hatalı")
+        token = f"admin_{uuid.uuid4().hex}"
+        await db.admin_sessions.insert_one({
+            "admin_id": admin["admin_id"], "token": token,
+            "expires_at": datetime.now(timezone.utc) + timedelta(hours=12),
+            "created_at": datetime.now(timezone.utc)
+        })
+        return {"admin": {"admin_id": admin["admin_id"], "name": admin["name"], "email": admin["email"], "role": admin.get("role", "admin")}, "token": token, "role": "admin"}
+    raise HTTPException(401, "Email veya şifre hatalı")
 
 @api_router.post("/auth/logout")
 async def logout(request: Request, response: Response):

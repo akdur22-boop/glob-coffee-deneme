@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -16,10 +16,16 @@ export default function ProfileScreen() {
   useEffect(() => { if (sessionToken) loadOrders(); }, [sessionToken]);
   const loadOrders = async () => { setLoading(true); try { const r = await fetch(`${API_URL}/api/orders`, { headers: { Authorization: `Bearer ${sessionToken}` } }); if (r.ok) setOrders(await r.json()); } catch {} finally { setLoading(false); } };
 
-  const handleLogout = () => Alert.alert('Çıkış Yap', 'Çıkış yapmak istediğinize emin misiniz?', [
-    { text: 'İptal', style: 'cancel' },
-    { text: 'Çıkış Yap', style: 'destructive', onPress: async () => { await logout(); router.replace('/'); } },
-  ]);
+  const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Çıkış yapmak istediğinize emin misiniz?')) { logout().then(() => router.replace('/')); }
+    } else {
+      Alert.alert('Çıkış Yap', 'Çıkış yapmak istediğinize emin misiniz?', [
+        { text: 'İptal', style: 'cancel' },
+        { text: 'Çıkış Yap', style: 'destructive', onPress: async () => { await logout(); router.replace('/'); } },
+      ]);
+    }
+  };
 
   if (!user) return (
     <SafeAreaView style={styles.container} edges={['top']}>

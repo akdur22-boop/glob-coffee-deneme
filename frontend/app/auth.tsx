@@ -50,15 +50,25 @@ export default function AuthScreen() {
       const data = await res.json();
 
       if (res.ok) {
-        await AsyncStorage.setItem('session_token', data.session_token);
-        setSessionToken(data.session_token);
-        setUser(data.user);
-        router.replace('/(tabs)');
+        // Admin girişi mi kontrol et
+        if (data.role === 'admin' && data.token) {
+          await AsyncStorage.setItem('admin_token', data.token);
+          router.replace('/admin/dashboard');
+        } else {
+          // Normal kullanıcı girişi
+          const token = data.session_token;
+          await AsyncStorage.setItem('session_token', token);
+          setSessionToken(token);
+          setUser(data.user);
+          router.replace('/(tabs)');
+        }
       } else {
-        Alert.alert('Hata', data.detail || 'Bir hata oluştu');
+        if (Platform.OS === 'web') { window.alert(data.detail || 'Bir hata oluştu'); }
+        else { Alert.alert('Hata', data.detail || 'Bir hata oluştu'); }
       }
     } catch (e) {
-      Alert.alert('Hata', 'Bağlantı hatası. Lütfen tekrar deneyin.');
+      if (Platform.OS === 'web') { window.alert('Bağlantı hatası. Lütfen tekrar deneyin.'); }
+      else { Alert.alert('Hata', 'Bağlantı hatası. Lütfen tekrar deneyin.'); }
     } finally {
       setLoading(false);
     }
