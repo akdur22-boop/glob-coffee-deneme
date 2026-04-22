@@ -1,11 +1,13 @@
 from fastapi import FastAPI, APIRouter, Request, Response, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
-import os, logging, uuid, httpx, hashlib, random
+import os, logging, uuid, httpx, hashlib, random, time, re
 from pathlib import Path
 from typing import List, Optional
 from datetime import datetime, timezone, timedelta
+from collections import defaultdict
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -18,6 +20,26 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# ═══ GÜVENLİK: Rate Limiting ═══
+login_attempts: dict = defaultdict(list)  # ip -> [timestamp, ...]
+MAX_LOGIN_ATTEMPTS = 10
+LOGIN_WINDOW_SECONDS = 300  # 5 dakika
+
+def check_rate_limit(ip: str):
+    now = time.time()
+    login_attempts[ip] = [t for t in login_attempts[ip] if now - t < LOGIN_WINDOW_SECONDS]
+    if len(login_attempts[ip]) >= MAX_LOGIN_ATTEMPTS:
+        raise HTTPException(429, f"Çok fazla giriş denemesi. {int(LOGIN_WINDOW_SECONDS/60)} dakika sonra tekrar deneyin.")
+    login_attempts[ip].append(now)
+
+# ═══ GÜVENLİK: Input Sanitization ═══
+def sanitize_input(text: str, max_length: int = 500) -> str:
+    if not text: return ""
+    text = text.strip()[:max_length]
+    text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r'[<>]', '', text)
+    return text
 
 def hash_password(p: str) -> str:
     return hashlib.sha256(p.encode()).hexdigest()
@@ -120,6 +142,9 @@ async def user_login(request: Request, response: Response):
     password = body.get("password", "")
     if not email or not password:
         raise HTTPException(400, "Email ve şifre gerekli")
+    # Rate limiting
+    client_ip = request.client.host if request.client else "unknown"
+    check_rate_limit(client_ip)
     # Önce normal kullanıcı tablosunda ara
     user = await db.users.find_one({"email": email}, {"_id": 0})
     if user:
@@ -153,8 +178,14 @@ async def user_login(request: Request, response: Response):
 
 @api_router.post("/auth/logout")
 async def logout(request: Request, response: Response):
+    # Cookie'den veya Authorization header'dan token al
     t = request.cookies.get("session_token")
-    if t: await db.user_sessions.delete_many({"session_token": t})
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        header_token = auth.split(" ")[1]
+        await db.user_sessions.delete_many({"session_token": header_token})
+    if t:
+        await db.user_sessions.delete_many({"session_token": t})
     response.delete_cookie(key="session_token", path="/")
     return {"message": "Çıkış yapıldı"}
 

@@ -1,346 +1,391 @@
 #!/usr/bin/env python3
 """
-Backend Authentication Testing for Glob Coffee App
-Tests user authentication endpoints: register, login, profile, logout
+Comprehensive Backend Test for Push Notification System and Security Features
+Tests the complete flow as requested in the review request.
 """
 
 import requests
 import json
 import time
 import sys
-from datetime import datetime
 
-# Configuration
-BACKEND_URL = "https://coffee-admin-portal.preview.emergentagent.com/api"
-HEADERS = {"Content-Type": "application/json"}
+# Backend URL from frontend .env
+BASE_URL = "https://coffee-admin-portal.preview.emergentagent.com/api"
 
 def log_test(test_name, success, details=""):
     status = "✅ PASS" if success else "❌ FAIL"
     print(f"{status} {test_name}")
     if details:
         print(f"   {details}")
-    return success
+    print()
 
-def test_user_register():
-    """Test user registration endpoint"""
-    print("\n=== Testing User Registration ===")
+def test_push_notification_and_security_flow():
+    """Test the complete push notification system and security features end-to-end"""
     
-    # Test 1: Successful registration
-    test_user = {
-        "name": "Test Kullanıcı",
-        "email": "test@example.com", 
-        "password": "test123456"
-    }
+    print("🔥 TESTING PUSH NOTIFICATION SYSTEM AND SECURITY FEATURES")
+    print("=" * 70)
     
+    session_token = None
+    admin_token = None
+    test_results = []
+    
+    # Test 1: Register a test user
+    print("1️⃣ REGISTERING TEST USER")
     try:
-        response = requests.post(f"{BACKEND_URL}/auth/register", 
-                               json=test_user, headers=HEADERS, timeout=10)
+        response = requests.post(f"{BASE_URL}/auth/register", 
+            json={
+                "name": "Bildirim Test",
+                "email": "bildirim@test.com", 
+                "password": "test123456"
+            },
+            headers={"Content-Type": "application/json"}
+        )
         
         if response.status_code == 201 or response.status_code == 200:
             data = response.json()
-            success = (
-                "user" in data and 
-                "session_token" in data and
-                data["user"]["email"] == test_user["email"] and
-                data["user"]["name"] == test_user["name"] and
-                data["user"]["points"] == 100 and
-                data["user"]["tier"] == "Bronz" and
-                "password_hash" not in data["user"]  # Should not return password
-            )
-            
-            if success:
-                # Store session token for later tests
-                global session_token
-                session_token = data["session_token"]
-                log_test("Register new user", True, 
-                        f"User created with 100 points, Bronz tier, session_token returned")
-                return data
-            else:
-                log_test("Register new user", False, f"Invalid response structure: {data}")
-                return None
-                
+            session_token = data.get("session_token")
+            log_test("User Registration", True, f"User registered successfully. Token: {session_token[:20]}...")
+            test_results.append(("User Registration", True))
         else:
-            log_test("Register new user", False, 
-                    f"HTTP {response.status_code}: {response.text}")
-            return None
+            log_test("User Registration", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("User Registration", False))
+            return test_results
             
     except Exception as e:
-        log_test("Register new user", False, f"Exception: {str(e)}")
-        return None
-
-def test_user_login(email="test@example.com", password="test123456"):
-    """Test user login endpoint"""
-    print("\n=== Testing User Login ===")
+        log_test("User Registration", False, f"Exception: {str(e)}")
+        test_results.append(("User Registration", False))
+        return test_results
     
-    login_data = {"email": email, "password": password}
-    
+    # Test 2: Check user has no notifications (or only welcome notifications)
+    print("2️⃣ CHECKING INITIAL NOTIFICATIONS")
     try:
-        response = requests.post(f"{BACKEND_URL}/auth/login",
-                               json=login_data, headers=HEADERS, timeout=10)
+        response = requests.get(f"{BASE_URL}/notifications",
+            headers={"Authorization": f"Bearer {session_token}"}
+        )
+        
+        if response.status_code == 200:
+            notifications = response.json()
+            log_test("Initial Notifications Check", True, f"Found {len(notifications)} initial notifications")
+            test_results.append(("Initial Notifications Check", True))
+        else:
+            log_test("Initial Notifications Check", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("Initial Notifications Check", False))
+            
+    except Exception as e:
+        log_test("Initial Notifications Check", False, f"Exception: {str(e)}")
+        test_results.append(("Initial Notifications Check", False))
+    
+    # Test 3: Admin login
+    print("3️⃣ ADMIN LOGIN")
+    try:
+        response = requests.post(f"{BASE_URL}/admin/login",
+            json={
+                "email": "admin@globcoffee.com",
+                "password": "admin123"
+            },
+            headers={"Content-Type": "application/json"}
+        )
         
         if response.status_code == 200:
             data = response.json()
-            success = (
-                "user" in data and
-                "session_token" in data and
-                data["user"]["email"] == email and
-                "password_hash" not in data["user"]  # Should not return password
-            )
-            
-            if success:
-                global session_token
-                session_token = data["session_token"]
-                log_test("Login with correct credentials", True,
-                        f"Login successful, session_token returned")
-                return data
-            else:
-                log_test("Login with correct credentials", False,
-                        f"Invalid response structure: {data}")
-                return None
-                
+            admin_token = data.get("token")
+            log_test("Admin Login", True, f"Admin logged in successfully. Token: {admin_token[:20]}...")
+            test_results.append(("Admin Login", True))
         else:
-            log_test("Login with correct credentials", False,
-                    f"HTTP {response.status_code}: {response.text}")
-            return None
+            log_test("Admin Login", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("Admin Login", False))
+            return test_results
             
     except Exception as e:
-        log_test("Login with correct credentials", False, f"Exception: {str(e)}")
-        return None
-
-def test_get_user_profile():
-    """Test getting user profile with session token"""
-    print("\n=== Testing User Profile ===")
+        log_test("Admin Login", False, f"Exception: {str(e)}")
+        test_results.append(("Admin Login", False))
+        return test_results
     
-    if not session_token:
-        log_test("Get user profile", False, "No session token available")
-        return None
-        
-    auth_headers = {
-        "Authorization": f"Bearer {session_token}",
-        "Content-Type": "application/json"
-    }
-    
+    # Test 4: Admin sends notification to all users
+    print("4️⃣ ADMIN SENDING NOTIFICATION TO ALL USERS")
     try:
-        response = requests.get(f"{BACKEND_URL}/auth/me",
-                              headers=auth_headers, timeout=10)
+        response = requests.post(f"{BASE_URL}/admin/notifications/send",
+            json={
+                "title": "Test Bildirimi",
+                "body": "Bu bir test bildirimidir. Tüm kullanıcılara gönderildi."
+            },
+            headers={
+                "Authorization": f"Bearer {admin_token}",
+                "Content-Type": "application/json"
+            }
+        )
         
         if response.status_code == 200:
             data = response.json()
-            success = (
-                "email" in data and
-                "name" in data and
-                "points" in data and
-                "tier" in data and
-                "password_hash" not in data  # Should not return password
-            )
-            
-            if success:
-                log_test("Get user profile with token", True,
-                        f"Profile retrieved: {data['name']} ({data['email']}) - {data['points']} points, {data['tier']} tier")
-                return data
-            else:
-                log_test("Get user profile with token", False,
-                        f"Invalid response structure: {data}")
-                return None
-                
+            log_test("Admin Send Notification", True, f"Notification sent: {data.get('message', 'Success')}")
+            test_results.append(("Admin Send Notification", True))
         else:
-            log_test("Get user profile with token", False,
-                    f"HTTP {response.status_code}: {response.text}")
-            return None
+            log_test("Admin Send Notification", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("Admin Send Notification", False))
             
     except Exception as e:
-        log_test("Get user profile with token", False, f"Exception: {str(e)}")
-        return None
-
-def test_duplicate_registration():
-    """Test duplicate email registration"""
-    print("\n=== Testing Duplicate Registration ===")
+        log_test("Admin Send Notification", False, f"Exception: {str(e)}")
+        test_results.append(("Admin Send Notification", False))
     
-    duplicate_user = {
-        "name": "Test Kullanıcı 2",
-        "email": "test@example.com",  # Same email as first user
-        "password": "test999999"
-    }
-    
+    # Test 5: Verify user received the notification
+    print("5️⃣ VERIFYING USER RECEIVED NOTIFICATION")
     try:
-        response = requests.post(f"{BACKEND_URL}/auth/register",
-                               json=duplicate_user, headers=HEADERS, timeout=10)
+        # Wait a moment for notification to be processed
+        time.sleep(1)
         
-        if response.status_code == 409:
-            data = response.json()
-            expected_message = "Bu email adresi zaten kayıtlı"
-            if expected_message in str(data):
-                log_test("Duplicate email registration", True,
-                        f"Correctly rejected with 409: {data}")
-                return True
+        response = requests.get(f"{BASE_URL}/notifications",
+            headers={"Authorization": f"Bearer {session_token}"}
+        )
+        
+        if response.status_code == 200:
+            notifications = response.json()
+            test_notification_found = False
+            
+            for notif in notifications:
+                if notif.get("title") == "Test Bildirimi":
+                    test_notification_found = True
+                    break
+            
+            if test_notification_found:
+                log_test("User Received Notification", True, f"Test notification found among {len(notifications)} notifications")
+                test_results.append(("User Received Notification", True))
             else:
-                log_test("Duplicate email registration", False,
-                        f"Wrong error message: {data}")
-                return False
+                log_test("User Received Notification", False, f"Test notification not found among {len(notifications)} notifications")
+                test_results.append(("User Received Notification", False))
         else:
-            log_test("Duplicate email registration", False,
-                    f"Expected 409, got {response.status_code}: {response.text}")
-            return False
+            log_test("User Received Notification", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("User Received Notification", False))
             
     except Exception as e:
-        log_test("Duplicate email registration", False, f"Exception: {str(e)}")
-        return False
-
-def test_wrong_password():
-    """Test login with wrong password"""
-    print("\n=== Testing Wrong Password ===")
+        log_test("User Received Notification", False, f"Exception: {str(e)}")
+        test_results.append(("User Received Notification", False))
     
-    wrong_login = {
-        "email": "test@example.com",
-        "password": "wrongpassword"
-    }
-    
+    # Test 6: Mark all as read
+    print("6️⃣ MARKING ALL NOTIFICATIONS AS READ")
     try:
-        response = requests.post(f"{BACKEND_URL}/auth/login",
-                               json=wrong_login, headers=HEADERS, timeout=10)
+        response = requests.post(f"{BASE_URL}/notifications/read-all",
+            headers={"Authorization": f"Bearer {session_token}"}
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            log_test("Mark All Read", True, f"Response: {data.get('message', 'Success')}")
+            test_results.append(("Mark All Read", True))
+        else:
+            log_test("Mark All Read", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("Mark All Read", False))
+            
+    except Exception as e:
+        log_test("Mark All Read", False, f"Exception: {str(e)}")
+        test_results.append(("Mark All Read", False))
+    
+    # Test 7: Verify all marked read
+    print("7️⃣ VERIFYING ALL NOTIFICATIONS MARKED AS READ")
+    try:
+        response = requests.get(f"{BASE_URL}/notifications",
+            headers={"Authorization": f"Bearer {session_token}"}
+        )
+        
+        if response.status_code == 200:
+            notifications = response.json()
+            all_read = all(notif.get("read", False) for notif in notifications)
+            
+            if all_read:
+                log_test("Verify All Read", True, f"All {len(notifications)} notifications marked as read")
+                test_results.append(("Verify All Read", True))
+            else:
+                unread_count = sum(1 for notif in notifications if not notif.get("read", False))
+                log_test("Verify All Read", False, f"{unread_count} notifications still unread")
+                test_results.append(("Verify All Read", False))
+        else:
+            log_test("Verify All Read", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("Verify All Read", False))
+            
+    except Exception as e:
+        log_test("Verify All Read", False, f"Exception: {str(e)}")
+        test_results.append(("Verify All Read", False))
+    
+    # Test 8: Test logout endpoint
+    print("8️⃣ TESTING LOGOUT ENDPOINT")
+    try:
+        response = requests.post(f"{BASE_URL}/auth/logout",
+            headers={"Authorization": f"Bearer {session_token}"}
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            expected_message = "Çıkış yapıldı"
+            if data.get("message") == expected_message:
+                log_test("Logout", True, f"Logout successful: {data.get('message')}")
+                test_results.append(("Logout", True))
+            else:
+                log_test("Logout", False, f"Unexpected message: {data.get('message')}")
+                test_results.append(("Logout", False))
+        else:
+            log_test("Logout", False, f"Status: {response.status_code}, Response: {response.text}")
+            test_results.append(("Logout", False))
+            
+    except Exception as e:
+        log_test("Logout", False, f"Exception: {str(e)}")
+        test_results.append(("Logout", False))
+    
+    # Test 9: Verify session invalidated
+    print("9️⃣ VERIFYING SESSION INVALIDATED")
+    try:
+        response = requests.get(f"{BASE_URL}/auth/me",
+            headers={"Authorization": f"Bearer {session_token}"}
+        )
         
         if response.status_code == 401:
-            data = response.json()
-            expected_message = "Email veya şifre hatalı"
-            if expected_message in str(data):
-                log_test("Login with wrong password", True,
-                        f"Correctly rejected with 401: {data}")
-                return True
-            else:
-                log_test("Login with wrong password", False,
-                        f"Wrong error message: {data}")
-                return False
+            log_test("Session Invalidated", True, "Session correctly invalidated (401 response)")
+            test_results.append(("Session Invalidated", True))
         else:
-            log_test("Login with wrong password", False,
-                    f"Expected 401, got {response.status_code}: {response.text}")
-            return False
+            log_test("Session Invalidated", False, f"Session still valid - Status: {response.status_code}")
+            test_results.append(("Session Invalidated", False))
             
     except Exception as e:
-        log_test("Login with wrong password", False, f"Exception: {str(e)}")
-        return False
-
-def test_short_password():
-    """Test registration with short password"""
-    print("\n=== Testing Short Password Registration ===")
+        log_test("Session Invalidated", False, f"Exception: {str(e)}")
+        test_results.append(("Session Invalidated", False))
     
-    short_password_user = {
-        "name": "Short",
-        "email": "short@example.com",
-        "password": "123"  # Too short
-    }
-    
+    # Test 10: Test rate limiting
+    print("🔟 TESTING RATE LIMITING")
     try:
-        response = requests.post(f"{BACKEND_URL}/auth/register",
-                               json=short_password_user, headers=HEADERS, timeout=10)
+        rate_limit_triggered = False
+        
+        for i in range(11):
+            response = requests.post(f"{BASE_URL}/auth/login",
+                json={
+                    "email": "wrong@test.com",
+                    "password": "wrongpass"
+                },
+                headers={"Content-Type": "application/json"}
+            )
+            
+            if response.status_code == 429:
+                rate_limit_triggered = True
+                break
+            
+            # Small delay between requests
+            time.sleep(0.1)
+        
+        if rate_limit_triggered:
+            log_test("Rate Limiting", True, "Rate limiting triggered after multiple failed attempts")
+            test_results.append(("Rate Limiting", True))
+        else:
+            log_test("Rate Limiting", False, "Rate limiting not triggered after 11 attempts")
+            test_results.append(("Rate Limiting", False))
+            
+    except Exception as e:
+        log_test("Rate Limiting", False, f"Exception: {str(e)}")
+        test_results.append(("Rate Limiting", False))
+    
+    # Test 11: Test input validation
+    print("1️⃣1️⃣ TESTING INPUT VALIDATION")
+    
+    # Test empty name
+    try:
+        response = requests.post(f"{BASE_URL}/auth/register",
+            json={
+                "name": "",
+                "email": "x@x.com",
+                "password": "123456"
+            },
+            headers={"Content-Type": "application/json"}
+        )
         
         if response.status_code == 400:
-            data = response.json()
-            expected_message = "Şifre en az 6 karakter olmalı"
-            if expected_message in str(data):
-                log_test("Short password registration", True,
-                        f"Correctly rejected with 400: {data}")
-                return True
-            else:
-                log_test("Short password registration", False,
-                        f"Wrong error message: {data}")
-                return False
+            log_test("Input Validation - Empty Name", True, "Empty name correctly rejected")
+            test_results.append(("Input Validation - Empty Name", True))
         else:
-            log_test("Short password registration", False,
-                    f"Expected 400, got {response.status_code}: {response.text}")
-            return False
+            log_test("Input Validation - Empty Name", False, f"Empty name not rejected - Status: {response.status_code}")
+            test_results.append(("Input Validation - Empty Name", False))
             
     except Exception as e:
-        log_test("Short password registration", False, f"Exception: {str(e)}")
-        return False
-
-def test_invalid_token():
-    """Test profile access with invalid token"""
-    print("\n=== Testing Invalid Token ===")
+        log_test("Input Validation - Empty Name", False, f"Exception: {str(e)}")
+        test_results.append(("Input Validation - Empty Name", False))
     
-    auth_headers = {
-        "Authorization": "Bearer invalid_token_here",
-        "Content-Type": "application/json"
-    }
-    
+    # Test short password
     try:
-        response = requests.get(f"{BACKEND_URL}/auth/me",
-                              headers=auth_headers, timeout=10)
+        response = requests.post(f"{BASE_URL}/auth/register",
+            json={
+                "name": "A",
+                "email": "y@y.com",
+                "password": "12"
+            },
+            headers={"Content-Type": "application/json"}
+        )
         
-        if response.status_code == 401:
-            log_test("Profile access with invalid token", True,
-                    f"Correctly rejected with 401: {response.text}")
-            return True
+        if response.status_code == 400:
+            log_test("Input Validation - Short Password", True, "Short password correctly rejected")
+            test_results.append(("Input Validation - Short Password", True))
         else:
-            log_test("Profile access with invalid token", False,
-                    f"Expected 401, got {response.status_code}: {response.text}")
-            return False
+            log_test("Input Validation - Short Password", False, f"Short password not rejected - Status: {response.status_code}")
+            test_results.append(("Input Validation - Short Password", False))
             
     except Exception as e:
-        log_test("Profile access with invalid token", False, f"Exception: {str(e)}")
-        return False
-
-def cleanup_test_user():
-    """Clean up test user from database"""
-    print("\n=== Cleanup ===")
-    # Note: In a real scenario, we might want to clean up test data
-    # For now, just log that testing is complete
-    print("Authentication testing completed. Test user remains in database.")
+        log_test("Input Validation - Short Password", False, f"Exception: {str(e)}")
+        test_results.append(("Input Validation - Short Password", False))
+    
+    # Test invalid email
+    try:
+        response = requests.post(f"{BASE_URL}/auth/register",
+            json={
+                "name": "A",
+                "email": "notanemail",
+                "password": "123456"
+            },
+            headers={"Content-Type": "application/json"}
+        )
+        
+        if response.status_code == 400:
+            log_test("Input Validation - Invalid Email", True, "Invalid email correctly rejected")
+            test_results.append(("Input Validation - Invalid Email", True))
+        else:
+            log_test("Input Validation - Invalid Email", False, f"Invalid email not rejected - Status: {response.status_code}")
+            test_results.append(("Input Validation - Invalid Email", False))
+            
+    except Exception as e:
+        log_test("Input Validation - Invalid Email", False, f"Exception: {str(e)}")
+        test_results.append(("Input Validation - Invalid Email", False))
+    
+    return test_results
 
 def main():
-    """Main test execution"""
-    global session_token
-    session_token = None
+    """Run all tests and provide summary"""
+    print("🚀 STARTING COMPREHENSIVE BACKEND TESTING")
+    print("Backend URL:", BASE_URL)
+    print()
     
-    print("=" * 60)
-    print("GLOB COFFEE - USER AUTHENTICATION TESTING")
-    print(f"Backend URL: {BACKEND_URL}")
-    print(f"Test Time: {datetime.now()}")
-    print("=" * 60)
+    test_results = test_push_notification_and_security_flow()
     
-    # Track test results
-    tests_passed = 0
-    total_tests = 0
+    # Summary
+    print("=" * 70)
+    print("📊 TEST SUMMARY")
+    print("=" * 70)
     
-    # Test sequence
-    test_functions = [
-        test_user_register,
-        test_user_login,
-        test_get_user_profile,
-        test_duplicate_registration,
-        test_wrong_password,
-        test_short_password,
-        test_invalid_token
-    ]
+    passed = sum(1 for _, success in test_results if success)
+    total = len(test_results)
     
-    for test_func in test_functions:
-        try:
-            result = test_func()
-            total_tests += 1
-            if result:
-                tests_passed += 1
-            time.sleep(0.5)  # Small delay between tests
-        except Exception as e:
-            print(f"❌ FAIL {test_func.__name__}: Unexpected error: {str(e)}")
-            total_tests += 1
+    print(f"Total Tests: {total}")
+    print(f"Passed: {passed}")
+    print(f"Failed: {total - passed}")
+    print(f"Success Rate: {(passed/total)*100:.1f}%")
+    print()
     
-    # Cleanup
-    cleanup_test_user()
+    if total - passed > 0:
+        print("❌ FAILED TESTS:")
+        for test_name, success in test_results:
+            if not success:
+                print(f"   • {test_name}")
+        print()
     
-    # Final results
-    print("\n" + "=" * 60)
-    print("AUTHENTICATION TEST SUMMARY")
-    print("=" * 60)
-    print(f"Total Tests: {total_tests}")
-    print(f"Passed: {tests_passed}")
-    print(f"Failed: {total_tests - tests_passed}")
-    print(f"Success Rate: {(tests_passed/total_tests)*100:.1f}%")
+    print("✅ PASSED TESTS:")
+    for test_name, success in test_results:
+        if success:
+            print(f"   • {test_name}")
     
-    if tests_passed == total_tests:
-        print("🎉 ALL AUTHENTICATION TESTS PASSED!")
-        return 0
-    else:
-        print(f"⚠️ {total_tests - tests_passed} tests failed")
-        return 1
+    return passed == total
 
 if __name__ == "__main__":
-    sys.exit(main())
+    success = main()
+    sys.exit(0 if success else 1)

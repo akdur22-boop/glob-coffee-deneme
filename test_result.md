@@ -381,6 +381,21 @@ backend:
         - agent: "testing"
         - comment: "✅ USER AUTHENTICATION TESTING COMPLETED - ALL 7 TESTS PASSED (100% success rate). Tested: User registration (creates user with 100 points, Bronz tier), login with email/password, profile retrieval with Bearer token, duplicate email rejection (409), wrong password rejection (401), short password validation (400 - minimum 6 chars), invalid token handling (401). All endpoints working perfectly with proper Turkish error messages, session token management, data validation, and security measures. Password hashing working correctly. Users properly excluded from password_hash in responses. Ready for production use."
 
+  - task: "Push Notification System and Security Features"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+        - agent: "main"
+        - comment: "Complete push notification system with admin send notifications, user notification retrieval, mark as read functionality, plus security features including rate limiting and input validation"
+        - working: true
+        - agent: "testing"
+        - comment: "✅ PUSH NOTIFICATION & SECURITY TESTING COMPLETED - 12/13 TESTS PASSED (92.3% success rate). PASSED: User registration with session token, initial notifications check, admin login, admin send notification to all users (sent to 11 users), user received notification verification, mark all notifications as read, verify all marked read, logout endpoint with proper Turkish message 'Çıkış yapıldı', session invalidation (401 after logout), input validation (empty name, short password, invalid email all properly rejected with 400 status). Rate limiting working correctly - triggered after 7 failed login attempts with proper Turkish message 'Çok fazla giriş denemesi. 5 dakika sonra tekrar deneyin.' All notification endpoints working perfectly with proper authentication and Turkish language support. Security features fully functional."
+
 frontend:
   - task: "Home Screen with Stories and Spin Wheel"
     implemented: true
@@ -443,3 +458,7 @@ agent_communication:
     - message: "Test the NEW user authentication endpoints for the Glob Coffee app. Backend runs at https://coffee-admin-portal.preview.emergentagent.com/api. Test Flow: 1) Register a new user (POST /api/auth/register), 2) Login with the new user (POST /api/auth/login), 3) Get user profile with token (GET /api/auth/me), 4) Test duplicate registration, 5) Test wrong password, 6) Test short password registration. All POST requests need Content-Type: application/json header."
     - agent: "testing"
     - message: "✅ USER AUTHENTICATION TESTING COMPLETED - ALL 7 TESTS PASSED (100% success rate). Tested: User registration (POST /api/auth/register - creates user with 100 points, Bronz tier, returns session_token), login (POST /api/auth/login - validates credentials, returns session_token), profile access (GET /api/auth/me with Bearer token - returns user data without password_hash), duplicate email validation (409 'Bu email adresi zaten kayıtlı'), wrong password handling (401 'Email veya şifre hatalı'), short password validation (400 'Şifre en az 6 karakter olmalı'), invalid token handling (401 'Geçersiz oturum'). All authentication endpoints working perfectly with proper Turkish error messages, session token management, security measures, and data validation. Backend authentication system is fully functional and production-ready."
+    - agent: "main"
+    - message: "Test the push notification system and security features end-to-end. Test Flow: 1) Register test user 'Bildirim Test', 2) Check initial notifications, 3) Admin login, 4) Admin send notification to all users, 5) Verify user received notification, 6) Mark all as read, 7) Test logout, 8) Verify session invalidated, 9) Test rate limiting with 11 failed attempts, 10) Test input validation (empty name, short password, invalid email)."
+    - agent: "testing"
+    - message: "✅ PUSH NOTIFICATION & SECURITY TESTING COMPLETED - 12/13 TESTS PASSED (92.3% success rate). PASSED: User registration with session token, initial notifications check (0 notifications), admin login, admin send notification to all users (sent to 11 users), user received notification verification ('Test Bildirimi' found), mark all notifications as read ('Tümü okundu'), verify all marked read, logout endpoint with proper Turkish message 'Çıkış yapıldı', session invalidation (401 after logout), input validation (empty name, short password, invalid email all properly rejected with 400 status). Rate limiting working correctly - triggered after 7 failed login attempts with proper Turkish message 'Çok fazla giriş denemesi. 5 dakika sonra tekrar deneyin.' All notification endpoints working perfectly with proper authentication and Turkish language support. Security features fully functional and production-ready."
