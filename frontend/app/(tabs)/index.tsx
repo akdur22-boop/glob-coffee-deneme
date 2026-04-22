@@ -197,10 +197,10 @@ function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: 
 
   return (
     <Modal visible transparent animationType="fade">
-      <View style={ws.overlay}>
-        <View style={ws.container}>
+      <TouchableOpacity style={ws.overlay} activeOpacity={1} onPress={onClose}>
+        <TouchableOpacity style={ws.container} activeOpacity={1} onPress={(e) => e.stopPropagation()}>
           <TouchableOpacity testID="wheel-close" style={ws.closeBtn} onPress={onClose}>
-            <Feather name="x" size={24} color="#231F20" />
+            <Feather name="x" size={22} color="#231F20" />
           </TouchableOpacity>
           <Text style={ws.title}>Günlük Şans Çarkı</Text>
           <Text style={ws.subtitle}>Her gün bir kez çevirme hakkınız var!</Text>
@@ -235,8 +235,11 @@ function SpinWheel({ prizes, onClose, sessionToken }: { prizes: any[]; onClose: 
               </TouchableOpacity>
             </View>
           )}
-        </View>
-      </View>
+          <TouchableOpacity testID="wheel-skip" style={ws.skipBtn} onPress={onClose}>
+            <Text style={ws.skipBtnText}>Daha Sonra</Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 }
@@ -517,8 +520,8 @@ const sv = StyleSheet.create({
 // ─── Spin Wheel Styles ───
 const ws = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
-  container: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, width: width * 0.9, maxHeight: '85%', alignItems: 'center' },
-  closeBtn: { position: 'absolute', top: 16, right: 16, zIndex: 10 },
+  container: { backgroundColor: '#FFF', borderRadius: 24, padding: 24, paddingTop: 48, width: width * 0.9, maxHeight: '80%', alignItems: 'center' },
+  closeBtn: { position: 'absolute', top: 12, right: 12, zIndex: 10, width: 36, height: 36, borderRadius: 18, backgroundColor: '#F5F0EB', justifyContent: 'center', alignItems: 'center' },
   title: { fontSize: 24, fontWeight: '800', color: '#231F20', marginBottom: 4 },
   subtitle: { fontSize: 14, color: '#8A8A8A', marginBottom: 20 },
   wheelWrap: { alignItems: 'center', position: 'relative' },
@@ -529,6 +532,8 @@ const ws = StyleSheet.create({
   sliceLabel: { color: '#FFF', fontSize: 11, fontWeight: '700' },
   spinBtn: { backgroundColor: '#800020', width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginTop: 20, borderWidth: 3, borderColor: '#FFF', elevation: 4 },
   spinBtnText: { color: '#FFF', fontSize: 14, fontWeight: '800' },
+  skipBtn: { marginTop: 16, paddingVertical: 10 },
+  skipBtnText: { fontSize: 14, color: '#8A8A8A', fontWeight: '600', textDecorationLine: 'underline' },
   resultWrap: { alignItems: 'center', paddingVertical: 20 },
   resultCircle: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FFF0F2', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
   resultTitle: { fontSize: 28, fontWeight: '800', color: '#231F20', marginBottom: 8 },

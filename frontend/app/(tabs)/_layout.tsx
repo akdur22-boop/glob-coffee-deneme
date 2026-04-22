@@ -3,7 +3,6 @@ import { Feather } from '@expo/vector-icons';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppProvider } from '../../context/AppContext';
 
 export default function TabLayout() {
   useEffect(() => {
@@ -29,18 +28,16 @@ export default function TabLayout() {
   };
 
   return (
-    <AppProvider>
-      <Tabs screenOptions={{
-        headerShown: false, tabBarActiveTintColor: '#800020', tabBarInactiveTintColor: '#8A8A8A',
-        tabBarStyle: { backgroundColor: '#FFF', borderTopColor: '#E5E0DB', borderTopWidth: 1, height: Platform.OS === 'ios' ? 88 : 64, paddingBottom: Platform.OS === 'ios' ? 28 : 8, paddingTop: 8 },
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', letterSpacing: 0.3 },
-      }}>
-        <Tabs.Screen name="index" options={{ title: 'Ana Sayfa', tabBarIcon: ({ color, size }) => <Feather name="home" size={size} color={color} /> }} />
-        <Tabs.Screen name="menu" options={{ title: 'Menü', tabBarIcon: ({ color, size }) => <Feather name="coffee" size={size} color={color} /> }} />
-        <Tabs.Screen name="rewards" options={{ title: 'Ödüller', tabBarIcon: ({ color, size }) => <Feather name="gift" size={size} color={color} /> }} />
-        <Tabs.Screen name="stores" options={{ title: 'Şubeler', tabBarIcon: ({ color, size }) => <Feather name="map-pin" size={size} color={color} /> }} />
-        <Tabs.Screen name="profile" options={{ title: 'Profil', tabBarIcon: ({ color, size }) => <Feather name="user" size={size} color={color} /> }} />
-      </Tabs>
-    </AppProvider>
+    <Tabs screenOptions={{
+      headerShown: false, tabBarActiveTintColor: '#800020', tabBarInactiveTintColor: '#8A8A8A',
+      tabBarStyle: { backgroundColor: '#FFF', borderTopColor: '#E5E0DB', borderTopWidth: 1, height: Platform.OS === 'ios' ? 88 : 64, paddingBottom: Platform.OS === 'ios' ? 28 : 8, paddingTop: 8 },
+      tabBarLabelStyle: { fontSize: 11, fontWeight: '600', letterSpacing: 0.3 },
+    }}>
+      <Tabs.Screen name="index" options={{ title: 'Ana Sayfa', tabBarIcon: ({ color, size }) => <Feather name="home" size={size} color={color} /> }} />
+      <Tabs.Screen name="menu" options={{ title: 'Menü', tabBarIcon: ({ color, size }) => <Feather name="coffee" size={size} color={color} /> }} />
+      <Tabs.Screen name="rewards" options={{ title: 'Ödüller', tabBarIcon: ({ color, size }) => <Feather name="gift" size={size} color={color} /> }} />
+      <Tabs.Screen name="stores" options={{ title: 'Şubeler', tabBarIcon: ({ color, size }) => <Feather name="map-pin" size={size} color={color} /> }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profil', tabBarIcon: ({ color, size }) => <Feather name="user" size={size} color={color} /> }} />
+    </Tabs>
   );
 }

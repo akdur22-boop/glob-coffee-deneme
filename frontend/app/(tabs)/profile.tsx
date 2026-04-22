@@ -16,13 +16,25 @@ export default function ProfileScreen() {
   useEffect(() => { if (sessionToken) loadOrders(); }, [sessionToken]);
   const loadOrders = async () => { setLoading(true); try { const r = await fetch(`${API_URL}/api/orders`, { headers: { Authorization: `Bearer ${sessionToken}` } }); if (r.ok) setOrders(await r.json()); } catch {} finally { setLoading(false); } };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const doLogout = async () => {
+      try {
+        await logout();
+      } catch (e) {
+        // Hata olsa bile çıkış yapmaya devam et
+        await AsyncStorage.removeItem('session_token');
+      }
+      router.replace('/');
+    };
+
     if (Platform.OS === 'web') {
-      if (window.confirm('Çıkış yapmak istediğinize emin misiniz?')) { logout().then(() => router.replace('/')); }
+      if (typeof window !== 'undefined' && window.confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+        await doLogout();
+      }
     } else {
       Alert.alert('Çıkış Yap', 'Çıkış yapmak istediğinize emin misiniz?', [
         { text: 'İptal', style: 'cancel' },
-        { text: 'Çıkış Yap', style: 'destructive', onPress: async () => { await logout(); router.replace('/'); } },
+        { text: 'Çıkış Yap', style: 'destructive', onPress: doLogout },
       ]);
     }
   };
