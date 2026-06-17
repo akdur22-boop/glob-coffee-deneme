@@ -1,0 +1,7 @@
+# Keep the build context clean so Metro re-transforms with the correct
+# EXPO_PUBLIC_BACKEND_URL (the committed .metro-cache has a stale inlined URL).
+.metro-cache
+node_modules
+dist
+.expo
+.git

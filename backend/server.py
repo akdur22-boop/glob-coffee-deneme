@@ -16,6 +16,13 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# ═══ MENULUX ENTEGRASYONU (menü kaynağı) ═══
+MENULUX_BASE = os.environ.get('MENULUX_BASE', 'https://apis.menulux.com/api')
+MENULUX_API_KEY = os.environ.get('MENULUX_API_KEY', '')
+MENULUX_CUSTOMER_ID = os.environ.get('MENULUX_CUSTOMER_ID', '')
+MENULUX_MENU_ID = int(os.environ.get('MENULUX_MENU_ID', '0') or 0)  # 0 = tüm menüler
+MENULUX_FALLBACK_IMG = "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400"
+
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 logging.basicConfig(level=logging.INFO)
@@ -252,7 +259,8 @@ async def create_menu_item(request: Request):
         "category": body.get("category", "Genel"),
         "image_url": body.get("image_url", "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400"),
         "sizes": body.get("sizes", []),
-        "popular": body.get("popular", False)
+        "popular": body.get("popular", False),
+        "source": "manual",
     }
     if isinstance(item["sizes"], str):
         item["sizes"] = [s.strip() for s in item["sizes"].split(",") if s.strip()]
@@ -275,6 +283,17 @@ async def delete_menu_item(item_id: str, request: Request):
     r = await db.menu_items.delete_one({"item_id": item_id})
     if r.deleted_count == 0: raise HTTPException(404, "Ürün bulunamadı")
     return {"message": "Ürün silindi"}
+
+@api_router.post("/admin/menu/sync-menulux")
+async def admin_sync_menulux(request: Request):
+    await get_admin_user(request)
+    if not (MENULUX_API_KEY and MENULUX_CUSTOMER_ID):
+        raise HTTPException(400, "Menulux yapılandırılmamış (MENULUX_API_KEY / MENULUX_CUSTOMER_ID)")
+    try:
+        n = await sync_menulux_menu()
+    except Exception as e:
+        raise HTTPException(502, f"Menulux senkron hatası: {e}")
+    return {"message": "Menulux senkron tamam", "count": n}
 
 # ═══ ADMIN: Store CRUD ═══
 @api_router.post("/admin/stores")
@@ -545,8 +564,16 @@ async def delete_reward(rid: str, request: Request):
 # ═══ CUSTOMER ENDPOINTS ═══
 @api_router.get("/menu")
 async def get_menu():
-    items = await db.menu_items.find({}, {"_id": 0}).to_list(100)
-    if not items: await seed_menu_data(); items = await db.menu_items.find({}, {"_id": 0}).to_list(100)
+    items = await db.menu_items.find({}, {"_id": 0}).to_list(2000)
+    if not items:
+        # Önce Menulux'tan çekmeyi dene; yapılandırılmamışsa demo menüye düş
+        try:
+            if await sync_menulux_menu() == 0:
+                await seed_menu_data()
+        except Exception as e:
+            logger.error(f"Menulux senkron hatası, demo menüye düşülüyor: {e}")
+            await seed_menu_data()
+        items = await db.menu_items.find({}, {"_id": 0}).to_list(2000)
     return items
 
 @api_router.get("/menu/{item_id}")
@@ -630,6 +657,69 @@ async def register_push_token(request: Request):
     await db.push_tokens.update_one({"user_id": user["user_id"]}, {"$set": {"token": body["token"], "user_id": user["user_id"]}}, upsert=True)
     return {"message": "Token kaydedildi"}
 
+# ═══ MENULUX: menüyü çek, eşle, senkronize et ═══
+async def _menulux_get(path: str):
+    url = f"{MENULUX_BASE}/{path}"
+    params = {"customerID": MENULUX_CUSTOMER_ID}
+    headers = {"apiKey": MENULUX_API_KEY}
+    async with httpx.AsyncClient(timeout=40) as cx:
+        r = await cx.get(url, params=params, headers=headers)
+        r.raise_for_status()
+        return r.json()
+
+def _menulux_group_names(menus: list) -> dict:
+    """MenuGroupID -> kategori adı (tüm menü ağacındaki gruplar, recursive)."""
+    names: dict = {}
+    def walk(groups):
+        for g in groups or []:
+            names[g.get("MenuGroupID")] = (g.get("Name") or g.get("Title") or "").strip()
+            walk(g.get("MenuGroups"))
+    for m in menus:
+        walk(m.get("MenuGroups"))
+    return names
+
+def _menulux_map_products(products: list, group_names: dict) -> list:
+    items = []
+    for p in products:
+        if p.get("Deleted") or p.get("Status") != 1:
+            continue
+        if MENULUX_MENU_ID and p.get("MenuID") != MENULUX_MENU_ID:
+            continue
+        price = p.get("Price") or 0
+        name = (p.get("Name") or "").strip()
+        if price <= 0 or not name:
+            continue
+        real_img = (p.get("ImageUrl") or "").strip()
+        items.append({
+            "item_id": str(p.get("ProductID")),
+            "name": name,
+            "description": (p.get("Description") or "").strip(),
+            "price": float(price),
+            "category": group_names.get(p.get("Group")) or "Diğer",
+            "image_url": real_img or MENULUX_FALLBACK_IMG,
+            "sizes": [],
+            # Gerçek (fotoğraflanmış) görseli olan ürünleri ana ekrandaki "Popüler" carousel'inde göster
+            "popular": bool(real_img),
+            "source": "menulux",
+        })
+    return items
+
+async def sync_menulux_menu() -> int:
+    """Menulux'tan ürünleri çekip db.menu_items'ı günceller. Eklenen ürün sayısını döner."""
+    if not (MENULUX_API_KEY and MENULUX_CUSTOMER_ID):
+        return 0
+    menus = await _menulux_get("MenuAPI/GetMenus")
+    products = await _menulux_get("ProductAPI/GetProducts")
+    items = _menulux_map_products(products, _menulux_group_names(menus))
+    if not items:
+        logger.warning("Menulux senkron: 0 ürün eşlendi, mevcut menü korunuyor")
+        return 0
+    # Elle eklenen ürünler (source=manual) korunur; demo seed + eski menulux temizlenir
+    await db.menu_items.delete_many({"source": {"$ne": "manual"}})
+    await db.menu_items.insert_many(items)
+    logger.info(f"Menulux senkron tamam: {len(items)} ürün")
+    return len(items)
+
 # ═══ SEED DATA ═══
 async def seed_menu_data():
     items = [
@@ -702,6 +792,13 @@ app.add_middleware(CORSMiddleware, allow_credentials=True, allow_origins=["*"], 
 async def startup():
     await seed_admin()
     await seed_campaigns()
+    # Menü kaynağını Menulux'tan senkronla (best-effort; hata olsa da backend açılır)
+    try:
+        n = await sync_menulux_menu()
+        if n:
+            logger.info(f"Başlangıç Menulux senkronu: {n} ürün")
+    except Exception as e:
+        logger.error(f"Başlangıç Menulux senkron hatası: {e}")
 
 @app.on_event("shutdown")
 async def shutdown():

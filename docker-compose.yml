@@ -15,6 +15,9 @@ services:
     environment:
       MONGO_URL: mongodb://goldia_mongo:27017
       DB_NAME: goldia
+      MENULUX_API_KEY: ${MENULUX_API_KEY}
+      MENULUX_CUSTOMER_ID: "15533"
+      MENULUX_MENU_ID: "20525"
     depends_on:
       - goldia_mongo
     networks:
