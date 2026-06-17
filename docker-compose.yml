@@ -1,0 +1,57 @@
+services:
+  goldia_mongo:
+    image: mongo:7
+    container_name: goldia_mongo
+    restart: always
+    volumes:
+      - goldia_mongo_data:/data/db
+    networks:
+      - reset_net
+
+  goldia_backend:
+    build: ./backend
+    container_name: goldia_backend
+    restart: always
+    environment:
+      MONGO_URL: mongodb://goldia_mongo:27017
+      DB_NAME: goldia
+    depends_on:
+      - goldia_mongo
+    networks:
+      - reset_net
+
+  goldia_frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the web bundle at build time; same-origin, nginx proxies /api
+        EXPO_PUBLIC_BACKEND_URL: https://ws.goldiadigital.com
+    container_name: goldia_frontend
+    restart: always
+    ports:
+      - "127.0.0.1:8099:80"
+    depends_on:
+      - goldia_backend
+    networks:
+      - reset_net
+
+  # Dedicated Cloudflare tunnel (SEPARATE Cloudflare account for goldiadigital.com).
+  # Set GOLDIA_TUNNEL_TOKEN in .env. In that account's dashboard, route
+  # ws.goldiadigital.com -> http://goldia_frontend:80 (reachable on this network).
+  goldia_tunnel:
+    image: cloudflare/cloudflared
+    container_name: goldia_tunnel
+    restart: always
+    command: tunnel --no-autoupdate run --token ${GOLDIA_TUNNEL_TOKEN}
+    depends_on:
+      - goldia_frontend
+    networks:
+      - reset_net
+
+volumes:
+  goldia_mongo_data:
+
+networks:
+  reset_net:
+    external: true
+    name: erp-sistemi_reset_net
